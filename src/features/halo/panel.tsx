@@ -4,8 +4,8 @@
 // "pure register" body (Spec 04 §3 / G5). The question is the hero (an animated
 // TextGenerateEffect title); the framing is tucked behind a quiet "Why is this
 // important?" disclosure so the step reads as title → straight into the questions.
-// The preamble is NOT shown here — it plays as a bridge on the previous step (see
-// preamble-bridge). Split-ready: the cleave (U4/G5) mounts two of these with
+// The preamble is NOT shown here — it shimmers in under the previous step as the
+// StepBridge. Split-ready: the cleave (U4/G5) mounts two of these with
 // identical typography. Interaction chrome lives in turn-view's `footer`.
 
 import { useState, type ReactNode } from "react";

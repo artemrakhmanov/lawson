@@ -6,11 +6,14 @@
 // instantly (no network); refreshSummary posts accumulated fills — the single
 // "model beat" on the one-pager.
 //
-// Navigation: the harness is forward-only (answer advances caseState and can't
-// rewind a turnId), so Back/Forward navigate the CACHED view history client-side
-// — past steps are revisited read-only; only the tip turn drives the harness.
-// Reset wipes the session back to the opening prompt. A localStorage mirror of
-// {stack, cursor} keeps a mid-rehearsal refresh from losing the demo (Spec 04 §6).
+// Advancing is two-phase and user-driven: start/answer fetch the next view and
+// STAGE it (without committing) — its preamble shimmers in under the current
+// step; the user clicks Next (proceed) to slide into it. The harness is
+// forward-only (answer advances caseState and can't rewind a turnId), so
+// Back/Forward navigate the CACHED view history client-side — past steps are
+// revisited read-only; only the tip turn drives the harness. Reset wipes the
+// session. A localStorage mirror of {stack, cursor} keeps a mid-rehearsal
+// refresh from losing the demo (Spec 04 §6).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
@@ -28,11 +31,6 @@ interface Nav {
 const MIRROR_KEY = "lawson.halo.v1";
 const EMPTY: Nav = { stack: [], cursor: -1 };
 
-// How long the incoming preamble lingers on the previous step before we slide
-// into the new question — reading time for a calm lead-in sentence.
-const BRIDGE_MS = 2400;
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 async function post<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
     method: "POST",
@@ -47,11 +45,14 @@ async function post<T>(url: string, body: unknown): Promise<T> {
 export interface HaloState {
   current: View | null;
   fills: Record<string, string>;
+  /** A request is in flight (the preamble is still shimmering / summary refreshing). */
   pending: boolean;
   error: string | null;
-  /** The incoming turn's preamble, shown on the PREVIOUS step before we advance. */
-  bridge: string | null;
-  /** pending OR mid-bridge — input + navigation are locked. */
+  /** The next view, fetched but not yet committed — its preamble bridges below. */
+  staged: View | null;
+  /** True from the moment an advance begins until the user proceeds (drives the bridge). */
+  advancing: boolean;
+  /** advancing OR refreshing — input + navigation are locked. */
   busy: boolean;
   /** Are we on the latest (live) view? Only then does the harness accept input. */
   atTip: boolean;
@@ -66,19 +67,10 @@ export function useHaloInteractor() {
   const [fills, setFills] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [bridge, setBridge] = useState<string | null>(null);
+  const [staged, setStaged] = useState<View | null>(null);
+  const [advancing, setAdvancing] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
   const hydrated = useRef(false);
-
-  // Play the incoming turn's preamble as a bridge on the current step, then hand
-  // back so the caller can commit the new view (which slides in preamble-free).
-  const playBridge = useCallback(async (view: View) => {
-    if (view.kind === "turn" && view.preamble?.trim()) {
-      setBridge(view.preamble.trim());
-      await sleep(BRIDGE_MS);
-      setBridge(null);
-    }
-  }, []);
 
   // Rehearsal refresh-safety: restore the whole navigable history.
   useEffect(() => {
@@ -107,52 +99,60 @@ export function useHaloInteractor() {
   const current = nav.cursor >= 0 ? nav.stack[nav.cursor] : null;
   const atTip = nav.cursor === nav.stack.length - 1;
 
+  // Fetch the next view and stage it under the current step (no commit yet).
+  const advance = useCallback(async (run: () => Promise<View>) => {
+    setError(null);
+    setAdvancing(true);
+    setStaged(null);
+    setPending(true);
+    try {
+      const view = await run();
+      setStaged(view); // bridge now shows its preamble + a Next button
+    } catch (e) {
+      setError((e as Error).message);
+      setAdvancing(false);
+    } finally {
+      setPending(false);
+    }
+  }, []);
+
   const start = useCallback(
-    async (seed: string) => {
-      setPending(true);
-      setError(null);
+    (seed: string) => {
       setFills({});
-      try {
-        const view = await post<ConditionedView>("/api/lawson/start", { seed });
-        setPending(false);
-        await playBridge(view); // preamble lingers on the opening screen
-        setDirection(1);
-        setNav({ stack: [view], cursor: 0 }); // fresh session
-      } catch (e) {
-        setError((e as Error).message);
-        setPending(false);
-      }
+      return advance(() => post<ConditionedView>("/api/lawson/start", { seed }));
     },
-    [playBridge],
+    [advance],
   );
 
   const answer = useCallback(
-    async (payload: AnswerPayload) => {
+    (payload: AnswerPayload) => {
       if (!current) return;
-      setPending(true);
-      setError(null);
-      try {
-        const view = await post<View>("/api/lawson/answer", {
+      return advance(() =>
+        post<View>("/api/lawson/answer", {
           sessionId: current.sessionId,
           turnId: current.turnId,
           payload,
-        });
-        setPending(false);
-        await playBridge(view); // preamble lingers on the step just answered
-        setFills({});
-        setDirection(1);
-        // Append after the tip (we only answer from the tip, so nothing to truncate).
-        setNav((n) => {
-          const stack = [...n.stack, view];
-          return { stack, cursor: stack.length - 1 };
-        });
-      } catch (e) {
-        setError((e as Error).message);
-        setPending(false);
-      }
+        }),
+      );
     },
-    [current, playBridge],
+    [current, advance],
   );
+
+  // Commit the staged view — slide into the next step (Next button).
+  const proceed = useCallback(() => {
+    setStaged((view) => {
+      if (!view) return null;
+      setFills({});
+      setDirection(1);
+      setNav((n) =>
+        n.stack.length === 0
+          ? { stack: [view], cursor: 0 } // first turn — fresh session
+          : { stack: [...n.stack, view], cursor: n.stack.length },
+      );
+      setAdvancing(false);
+      return null;
+    });
+  }, []);
 
   // LOCAL only — instant, no network (the fill-in-the-blank gesture).
   const fillSlot = useCallback((key: string, value: string) => {
@@ -195,6 +195,8 @@ export function useHaloInteractor() {
   const reset = useCallback(() => {
     setDirection(-1);
     setNav(EMPTY);
+    setStaged(null);
+    setAdvancing(false);
     setFills({});
     setError(null);
   }, []);
@@ -205,15 +207,16 @@ export function useHaloInteractor() {
       fills,
       pending,
       error,
-      bridge,
-      busy: pending || bridge !== null,
+      staged,
+      advancing,
+      busy: advancing || pending,
       atTip,
       canBack: nav.cursor > 0,
       canForward: nav.cursor >= 0 && nav.cursor < nav.stack.length - 1,
       direction,
     }),
-    [current, fills, pending, error, bridge, atTip, nav.cursor, nav.stack.length, direction],
+    [current, fills, pending, error, staged, advancing, atTip, nav.cursor, nav.stack.length, direction],
   );
 
-  return { state, actions: { start, answer, fillSlot, refreshSummary, back, forward, reset } };
+  return { state, actions: { start, answer, fillSlot, refreshSummary, proceed, back, forward, reset } };
 }

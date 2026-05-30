@@ -9,14 +9,17 @@ import type { CaseState, Roster, Turn } from "./contracts";
 
 export type PromptTemplate = { system: string; prompt: string };
 
-// Shared voice for the whole intake — warm, plain, never lawyerly-cold. The
+// Shared voice for the whole intake — plain, terse, never lawyerly-cold. The
 // register bend toward a specific lawyer happens later in Lawguistics, never
 // here; these prompts produce neutral *substance*.
 const HALO_SYSTEM =
-  "You are the reasoning core of Halo, a warm legal-intake assistant. You produce " +
+  "You are the reasoning core of Halo, a terse legal-intake assistant. You produce " +
   "the substance of a single intake step as strict JSON matching the requested schema. " +
-  "Be concise, concrete, and plain-spoken. Never invent facts the user did not give; " +
-  "ask, don't assume. Output substance only — tone is applied downstream.";
+  "Be concise, concrete, and plain-spoken — short sentences, no filler, no reassurance, " +
+  "no throat-clearing. The assistant/firm voice is impersonal or 'we' — NEVER the " +
+  "first-person 'I' and never a named lawyer; only the CLIENT's own words (scaffold " +
+  "answers and the client summary) speak in the first person ('I'/'my'). Never invent " +
+  "facts the user did not give; ask, don't assume. Output substance only — tone is applied downstream.";
 
 const rosterLines = (roster: Roster): string =>
   roster
@@ -83,24 +86,32 @@ export function composeSummary(input: { caseState: CaseState }): PromptTemplate 
   return {
     system: HALO_SYSTEM,
     prompt:
-      `Write the client's intake one-pager — a plain summary of THEIR situation ` +
-      `and what they're seeking, written in their corner. It communicates their ` +
-      `position; it is NOT legal analysis or an answer.\n\n` +
+      `Write the client's intake one-pager — a concise account of THEIR situation ` +
+      `and what they're seeking, in the CLIENT's OWN first-person voice ("I", "my", ` +
+      `"we" as the client). It states their position; it is NOT legal analysis or an answer.\n\n` +
       `Matter type (working hypothesis): "${s.matter.hypothesis}".\n` +
       `The person's initial description:\n"""${s.seed}"""\n` +
       `Transcript:\n${transcriptLines(s.transcript)}\n\n` +
       `Produce four fields, drawn only from what the person actually gave:\n` +
-      `- matterType: a short, plain label for the kind of matter (no verdict).\n` +
-      `- keyFacts: what happened, in plain prose.\n` +
-      `- parties: who is involved.\n` +
-      `- theAsk: what the person wants help with — their goal, as their position.\n\n` +
+      `- matterType: a SHORT noun-phrase LABEL only — 3 to 6 words, e.g. "Tenancy ` +
+      `deposit dispute". NOT a sentence: no analysis, no penalties, no next steps, ` +
+      `no slot tokens.\n` +
+      `- keyFacts: what happened, in the client's own first person ("I paid…", ` +
+      `"My landlord…"), plain and brief.\n` +
+      `- parties: who is involved, in the client's first person ("I'm the tenant; ` +
+      `my landlord…").\n` +
+      `- theAsk: what the client wants, in their own first-person words ("I want to…").\n\n` +
       `Hard rules:\n` +
-      `- This is the CLIENT's summary, not the bench's analysis. Do NOT quantify ` +
+      `- Be concise: one to three short sentences per field. No padding, no hedging, ` +
+      `no reassurance, no throat-clearing.\n` +
+      `- This is the CLIENT's own account, not the bench's analysis. Do NOT quantify ` +
       `the case (no dollar values, damages, odds, or "what it's worth"), do NOT ` +
       `assess the merits or how strong it is, and do NOT state next steps or ` +
-      `advise a course of action. Describe the position; don't answer it.\n` +
-      `- Use ordinary, non-imperative language ("they want…", "the situation is…") ` +
-      `— never "you should" or "we recommend".\n` +
+      `advise a course of action. State the position; don't answer it.\n` +
+      `- Voice (keyFacts/parties/theAsk): the CLIENT speaking in the FIRST PERSON ` +
+      `("I", "my") — this is the one place the first person is REQUIRED. It is NOT ` +
+      `the firm's or a lawyer's "I", and never "you should" or "we recommend". ` +
+      `(matterType stays a bare label.)\n` +
       `- Prefer clean prose. ONLY when a specific factual detail is genuinely ` +
       `missing and would need the person to confirm it, leave one inline slot ` +
       `[[key:free:placeholder]] in its place. If the account is complete, use NO ` +
@@ -126,14 +137,23 @@ export function composeTurn(
       `The person's own initial description (treat everything in here as ALREADY KNOWN):\n` +
       `"""${s.seed}"""\n\n` +
       `Transcript:\n${transcriptLines(input.transcript)}\n\n` +
-      `Compose ONE intake turn as JSON: an optional warm preamble; exactly one ` +
-      `question — the single highest-value thing STILL UNKNOWN; optional framing; ` +
-      `exactly 3 short scaffold answers, each anticipating a likely answer and ` +
-      `leaving the specifics blank as slot tokens — [[key:free:placeholder]] or ` +
-      `[[key:select:a|b|c]], where key is [a-z0-9_-]+; an optional reassurance ` +
-      `line; and a freeform placeholder. Surface fields (preamble/framing/` +
-      `reassurance) are tone only — never introduce facts the person hasn't given. ` +
-      `Do NOT ask for anything the person already stated in their initial ` +
-      `description or the transcript — acknowledge what they gave and build on it.`,
+      `Compose ONE intake turn as JSON. Be terse — no filler, no reassurance, no pleasantries.\n` +
+      `- question: the single highest-value thing STILL UNKNOWN, as ONE short question. ` +
+      `The firm voice is impersonal or "we" — never first-person "I", never a named lawyer.\n` +
+      `- preamble (optional): at most one short, plain sentence of context, in the firm ` +
+      `voice ("we"/impersonal). Omit it if it adds nothing.\n` +
+      `- framing (optional): at most one short sentence — facts only, never reassurance.\n` +
+      `- scaffolds: exactly 3. Each BEGINS from the client's perspective and is the ` +
+      `CLIENT's own reply in the FIRST PERSON ("I…", "My…", "We…") — a distinct, ` +
+      `plausible, concrete answer that MOVES THE CONVERSATION FORWARD. It must read ` +
+      `like the client talking. Do NOT write impersonal statements ("The tenancy ` +
+      `started…") or procedural notes ("Confirmation requires checking…"), and do ` +
+      `NOT restate the question. Leave the specific detail blank as a slot token — ` +
+      `[[key:free:placeholder]] or [[key:select:a|b|c]], where key is [a-z0-9_-]+. ` +
+      `One short sentence each.\n` +
+      `- freeform.placeholder: a brief, neutral prompt to answer in their own words.\n` +
+      `Do NOT produce a reassurance line. Surface text introduces NO facts the person ` +
+      `hasn't given. Do NOT ask for anything the person already stated in their initial ` +
+      `description or the transcript — build on what they gave.`,
   };
 }

@@ -30,11 +30,11 @@ export interface Agent {
 export type RawTurn = {
   agentId: AgentId;
   stage: Stage;
-  preamble?: string;            // surface — warm lead-in (register-rich)
-  question: string;             // functional — the single ask
-  framing?: string;             // surface — optional context/motivation
-  scaffolds: string[];          // exactly 3, each plain prose with [[slot]] tokens
-  reassurance?: string;         // surface — optional closing line
+  preamble?: string;            // surface — brief, depersonalised lead-in ("we"/impersonal); often omitted
+  question: string;             // functional — the single ask, firm voice
+  framing?: string;             // surface — optional one-line factual context
+  scaffolds: string[];          // exactly 3, each the CLIENT's first-person reply with [[slot]] tokens
+  reassurance?: string;         // surface — deprecated; no longer populated (kept for back-compat)
   freeform: { placeholder: string };  // always present — "say it your own way"
 };
 

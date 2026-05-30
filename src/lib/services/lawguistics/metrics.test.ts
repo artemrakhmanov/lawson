@@ -144,7 +144,7 @@ test("metricsToDirectives: clipped for short text, flowing for long", () => {
       "Although the underlying matter remains genuinely intricate, we should, in the fullness of time and with appropriate diligence, weigh every available avenue before reaching any firm conclusion.",
     ),
   );
-  assert.ok(long.some((s) => /long, flowing/.test(s)));
+  assert.ok(long.some((s) => /moderately long/.test(s)));
 });
 
 test("metricsToDirectives never verbalises function-word dims", () => {

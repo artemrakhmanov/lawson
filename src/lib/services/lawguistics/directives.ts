@@ -19,7 +19,7 @@ export function metricsToDirectives(v: MetricVector): string[] {
   if (v.meanSentenceLen < 11) {
     d.push("Use short, clipped sentences (~6–11 words).");
   } else if (v.meanSentenceLen > 20) {
-    d.push("Use long, flowing sentences (~20–30 words) with subordinate clauses.");
+    d.push("Use moderately long sentences (~14–20 words); trim every clause that doesn't carry a fact — no padding.");
   } else {
     d.push("Use medium sentences (~12–18 words).");
   }
@@ -44,7 +44,7 @@ export function metricsToDirectives(v: MetricVector): string[] {
 
   // punctuation rhythm
   if (v.commaRate > 2) {
-    d.push("Use commas freely; layer clauses.");
+    d.push("Allow some clause-layering with commas — but keep each sentence tight.");
   }
   if (v.dashRate > 0.3) {
     d.push("Use em-dashes for emphasis.");

@@ -90,7 +90,7 @@
           "by end of week",
           "before Friday"
         ],
-        "hedgingPosture": "directive — qualifications appear only when quantifying probability against the client (e.g. 'serious probability'), never to soften commands or cushion bad news; Vane owns the assessment and transfers the risk of inaction squarely to the client",
+        "hedgingPosture": "directive — qualifications appear only when quantifying probability against the client (e.g. 'serious probability'), never to soften commands or cushion bad news; the assessment is owned firmly and the risk of inaction sits with the client",
         "exemplarLine": "We lost that argument. Adjust your expectations accordingly."
       }
     },
@@ -135,7 +135,7 @@
           "before — not after"
         ],
         "hedgingPosture": "directive — qualifications appear only to sharpen the threat, never to soften the instruction; uncertainty is weaponised ('today' after 'you are not the target') rather than used to comfort",
-        "exemplarLine": "I will tell you where you stand after I see the documents. Not before."
+        "exemplarLine": "We will tell you where you stand after we see the documents. Not before."
       }
     },
     {
@@ -157,31 +157,24 @@
         "dashRate": 0.5161290322580645
       },
       "brief": {
-        "label": "reassuring, methodical, client-centred warmth",
-        "cadence": "Long, subordinate-clause-laden sentences that loop back to reassure before closing; each sentence carries its own qualification and its own comfort, producing a measured, unhurried forward motion.",
+        "label": "measured, methodical, plain",
+        "cadence": "Ordered, even sentences that set out the position in sequence — clear and unhurried, but tight, with no clause that does not carry a fact.",
         "moves": [
-          "Pre-empts client anxiety by naming the worry and then immediately defusing it",
-          "Structures complexity into numbered or sequential stages to create a sense of orderly progress",
-          "Signals transparency explicitly ('I want to be straightforward', 'I wanted to be transparent') before delivering any potentially unsettling information",
-          "Closes each substantive point with an invitation to contact, reinforcing accessibility",
-          "Marks positive milestones with genuine warmth ('genuinely good news', 'rather exciting juncture') to sustain client confidence"
+          "Lays the position out in a clear, ordered sequence",
+          "States each step plainly before any qualification",
+          "Keeps to what is known; does not speculate or reassure",
+          "Closes on the concrete next step"
         ],
         "lexicalFingerprint": [
-          "entirely",
-          "straightforward",
-          "in my experience",
-          "typically",
-          "I will of course",
-          "proactively on your behalf",
-          "without difficulty",
-          "in a structured and deliberate way",
-          "sensible pace",
-          "I would gently flag",
-          "manageable",
-          "reassuring"
+          "the position",
+          "in sequence",
+          "ordinarily",
+          "the next step",
+          "accordingly",
+          "as it stands"
         ],
-        "hedgingPosture": "balanced — Jonathan offers clear recommendations and anticipated timelines but consistently wraps them in conditional qualifiers ('all things proceeding normally', 'in all likelihood', 'should be able to') and defers final decisions explicitly to the client, avoiding both blunt directiveness and excessive equivocation",
-        "exemplarLine": "I want to be straightforward with you about it while also reassuring you that, in my experience, issues of this nature are typically very manageable and rarely derail a transaction of this kind."
+        "hedgingPosture": "balanced — clear positions wrapped in measured qualifiers ('ordinarily', 'as it stands'); no personal framing and no comfort-language",
+        "exemplarLine": "The position is straightforward; the next steps follow in sequence."
       }
     },
     {
@@ -203,29 +196,24 @@
         "dashRate": 0.32432432432432434
       },
       "brief": {
-        "label": "reassuring, methodical, client-steadying",
-        "cadence": "Long, layered sentences that open with a calming frame before delivering the substantive point, often closing with an explicit invitation to make contact.",
+        "label": "methodical, plain, sequential",
+        "cadence": "Even, ordered sentences that state the point and move to the next step without padding.",
         "moves": [
-          "Pre-emptive reassurance: names the concern the client is likely feeling before addressing it",
-          "Normalising the unfamiliar: labels each step or complication as 'routine', 'standard', or 'well-trodden' to reduce anxiety",
-          "Sequenced roadmap: lays out next steps in numbered or ordered prose so the client always knows what comes next",
-          "Explicit instruction: tells the client precisely what action they should take and why",
-          "Warm close with open-door offer: ends every message by inviting contact and signalling continued availability"
+          "Sets out next steps in order so the sequence is clear",
+          "Labels routine matters as routine, without elaboration",
+          "States the required action plainly",
+          "Closes on the next step"
         ],
         "lexicalFingerprint": [
-          "entirely routine",
-          "I would reassure you",
+          "routine",
+          "in order",
+          "the next step",
           "generally",
-          "well-positioned",
-          "I will be in touch",
-          "please do not hesitate",
-          "manageable",
-          "carefully",
-          "in my experience",
-          "I would encourage you"
+          "as things stand",
+          "accordingly"
         ],
-        "hedgingPosture": "balanced — qualifies risk with 'generally' and 'typically' to avoid over-promising, but consistently steers toward a positive outcome rather than leaving the client in uncertainty",
-        "exemplarLine": "Settlement, when everything is prepared properly, is generally a smooth and almost anticlimactic event — which is exactly how we like it."
+        "hedgingPosture": "balanced — qualifies with 'generally'/'typically' to avoid over-promising, but states the position plainly; no personal framing",
+        "exemplarLine": "Settlement is generally an orderly, uneventful step once the documents are in order."
       }
     },
     {
@@ -250,28 +238,24 @@
         "label": "precision-dense, enumerated, risk-flagging",
         "cadence": "Long, architecturally nested opening sentences establish the full transactional frame before shorter, numbered action-items deliver verdict and instruction in sequence.",
         "moves": [
-          "Opens with a dense scene-setting recital that names all parties, instruments, and key figures before any issue is raised",
-          "Triages issues in numbered series (First / Second / Third), each structured as: fact → risk diagnosis → specific remedy",
-          "Quantifies every risk and recommendation with precise figures, ratios, dates, or thresholds rather than leaving them abstract",
-          "Closes with a hard deadline and a named next step, framing urgency as procedural necessity rather than personal pressure",
-          "Embeds market-standard benchmarking ('market-standard position', 'ordinarily regard as acceptable') to anchor his recommendations as objective rather than advisory preference"
+          "Opens with a dense recital naming the parties, instruments, and key figures before any issue is raised",
+          "Triages issues in numbered series (First / Second / Third), each structured as: fact → risk → specific remedy",
+          "Quantifies every risk and recommendation with precise figures, ratios, dates, or thresholds",
+          "Closes with a hard deadline and a named next step, framing urgency as procedural necessity",
+          "Benchmarks against market-standard positions to anchor recommendations as objective"
         ],
         "lexicalFingerprint": [
-          "I flag",
-          "I strongly recommend",
-          "I propose",
-          "I would characterise",
+          "we flag",
+          "we strongly recommend",
+          "we propose",
           "revert with your instructions",
           "no later than",
           "falls outside that threshold",
-          "attendant",
           "contingent upon",
-          "in my assessment",
-          "serviceable in the base case",
-          "without further slippage"
+          "serviceable in the base case"
         ],
         "hedgingPosture": "directive — recommendations are framed as near-imperatives backed by quantified risk; qualifications appear only to sharpen the case for action, not to soften it",
-        "exemplarLine": "I flag three matters requiring your instructions before we can progress to execution."
+        "exemplarLine": "We flag three matters requiring your instructions before execution."
       }
     },
     {
@@ -303,20 +287,17 @@
           "Issues explicit cautions ('I would caution against…', 'This is unacceptable and must be corrected') to signal non-negotiable positions"
         ],
         "lexicalFingerprint": [
-          "I write further to",
-          "I would recommend",
-          "I would advise",
-          "I would caution against",
+          "we would recommend",
+          "we would advise",
+          "we would caution against",
           "as currently drafted",
           "requires amendment",
           "materially uncertain",
-          "without prejudice",
           "subject to your instruction",
-          "please confirm",
-          "please revert"
+          "please confirm"
         ],
-        "hedgingPosture": "directive — Claire states positions and issues instructions rather than floating options; qualifications appear only to flag residual uncertainty on quantum or procedure, never to soften the core recommendation",
-        "exemplarLine": "I would caution against granting consent unconditionally or by conduct: if Solvara proceeds on any lesser basis, the enforceability of the Minimum Annual Purchase Commitment as against NL-UK becomes materially uncertain."
+        "hedgingPosture": "directive — states positions and issues instructions rather than floating options; qualifications appear only to flag residual uncertainty on quantum or procedure, never to soften the core recommendation",
+        "exemplarLine": "We would caution against granting consent by conduct: on any lesser basis the enforceability of the Minimum Annual Purchase Commitment becomes materially uncertain."
       }
     }
   ]
