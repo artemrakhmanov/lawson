@@ -134,15 +134,17 @@ export function Cleave({
               )}
 
               {lsm != null && (
-                <div className="flex min-w-56 flex-1 flex-col items-center justify-center gap-3 py-2">
-                  <div className="rounded-lg border border-border">
+                <div className="flex min-w-56 flex-1 flex-col items-start justify-between gap-3 py-2">
+                  <div className="">
                     <LsmBadge value={lsm} />
                   </div>
                   {lawyer && (
-                    <p className="text-center text-sm italic text-muted-foreground">
-                      Most likely lawyer match —{" "}
-                      <span className="font-medium not-italic text-foreground">{lawyer.name}</span>
-                    </p>
+                    <div className="flex flex-col items-start gap-2 text-sm italic text-muted-foreground">
+                      <span>Most likely lawyer match</span>
+                      <AnnotationCircle delay={0.6} className="not-italic text-foreground">
+                        <span className="text-base font-medium">{lawyer.name}</span>
+                      </AnnotationCircle>
+                    </div>
                   )}
                 </div>
               )}
