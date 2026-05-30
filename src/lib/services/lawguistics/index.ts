@@ -1,52 +1,53 @@
 // lawguistics/index.ts — the `Lawguistics` brand object. The harness imports
-// ONLY this (and the shared types). Stage-0 ships RUNNABLE stubs (R3) so the
-// harness runs end-to-end on identity before any real voice exists:
-//   - condition        → identity passthrough (baseline == conditioned)
-//   - drift.forStage    → 0 (no convergence yet)
-//   - matchTarget/getSignature → a frozen neutral VoiceSignature
-// The rest throw NOT_IMPL until their stages land; stage-0 intake never calls
-// them. Real impls are wired in Stage 3 (D5) with zero changes to this surface.
+// ONLY this (and the shared types). Stage 3 (D5): every public method is now
+// backed by a real implementation reading the frozen signatures.json. The
+// stage-0 stubs (identity condition, drift=0, neutral matchTarget/getSignature)
+// are gone — swapping stub→real changed ONLY this file's internals; the harness
+// and UI never move.
+//
+// Where the public signature hides `ranges`/`origin`, this file closes over the
+// frozen RANGES / ROSTER_MEDIAN from signatures.ts:
+//   - convergence(out, lawyer)        → _convergence(out, lawyer, RANGES)
+//   - condition(text, target, drift, origin?) → injects {RANGES, ROSTER_MEDIAN}
 
-import type {
-  MetricVector, VoiceSignature, Lawyer, Stage, ConditionResult, FidelityResult,
-} from "./types";
-import { METRIC_KEYS } from "./types";   // runtime value — for the neutral metric vector below
-
-const NOT_IMPL = (n: string): never => { throw new Error(`Lawguistics.${n} not implemented yet`); };
-
-// R3 — a frozen neutral signature returned by matchTarget/getSignature so the
-// harness's emit can resolve a target and call condition; stage-0 condition
-// ignores target/drift and identity-passes. Real signatures land in Stage 2/3.
-const NEUTRAL_METRICS = Object.fromEntries(METRIC_KEYS.map((k) => [k, 0])) as MetricVector;
-const NEUTRAL_SIGNATURE: VoiceSignature = {
-  lawyerId: "__neutral__",
-  metrics: NEUTRAL_METRICS,
-  brief: { label: "neutral", cadence: "", moves: [], lexicalFingerprint: [], hedgingPosture: "balanced", exemplarLine: "" },
-};
+import { measure } from "./metrics.ts";
+import { convergence as _convergence, lsm } from "./stats.ts";
+import { forStage } from "./drift.ts";
+import { condition as _condition } from "./condition.ts";
+import { judgeFidelity } from "./fidelity.ts";
+import { getLawyer, getSignature, matchTarget, RANGES, ROSTER_MEDIAN } from "./signatures.ts";
+import type { MetricVector, VoiceSignature, ConditionResult } from "./types.ts";
 
 export const Lawguistics = {
   /**
    * Bend `text` from the user's register toward `target`'s voice by `drift`.
-   * `origin` is the starting metric vector; OMIT it to default to the
-   * roster-median origin (ROSTER_MEDIAN, wired in Stage 2/3).
-   * Stage 0: identity passthrough — baseline == conditioned, slots trivially
-   * preserved. Async because the real impl calls a model; `emit` awaits it.
+   * `origin` is the client's starting vector; OMIT it to default to the
+   * roster-median (ROSTER_MEDIAN). Async — `emit` awaits it. Returns both
+   * registers; slot tokens preserved; facts unchanged (fidelity-gated).
    */
-  condition(text: string, _target: VoiceSignature, _drift: number, _origin?: MetricVector): Promise<ConditionResult> {
-    return Promise.resolve({ conditioned: text, baseline: text });
+  condition(
+    text: string,
+    target: VoiceSignature,
+    drift: number,
+    origin?: MetricVector,
+  ): Promise<ConditionResult> {
+    return _condition(text, target, drift, origin, {
+      ranges: RANGES,
+      rosterMedian: ROSTER_MEDIAN,
+    });
   },
-  judgeFidelity(_substance: string, _baseline: string, _conditioned: string): Promise<FidelityResult> {
-    return NOT_IMPL("judgeFidelity");
+  // exposed for testing/audit; condition runs it internally as the meaning gate
+  judgeFidelity,
+  drift: { forStage },
+  measure,
+  // public 2-arg contract closes over the frozen ranges
+  convergence(output: MetricVector, lawyer: MetricVector): number {
+    return _convergence(output, lawyer, RANGES);
   },
-  drift: {
-    forStage(_stage: Stage): number { return 0; },   // stage-0 ignores drift
-  },
-  measure(_text: string): MetricVector { return NOT_IMPL("measure"); },
-  convergence(_output: MetricVector, _lawyer: MetricVector): number { return NOT_IMPL("convergence"); },
-  lsm(_a: MetricVector, _b: MetricVector): number { return NOT_IMPL("lsm"); },
-  getSignature(_lawyerId: string): VoiceSignature { return NEUTRAL_SIGNATURE; },   // R3 neutral stub
-  getLawyer(_id: string): Lawyer { return NOT_IMPL("getLawyer"); },
-  matchTarget(_lawyerId: string): VoiceSignature { return NEUTRAL_SIGNATURE; },     // R3 neutral stub
+  lsm,
+  getSignature,
+  getLawyer,
+  matchTarget,
 };
 
 export type {

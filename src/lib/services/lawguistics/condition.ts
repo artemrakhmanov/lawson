@@ -23,7 +23,11 @@ import { judgeFidelity } from "./fidelity.ts";
 
 // ── Module-local config (no env churn) ──────────────────────────────────────
 const DEV = process.env.NODE_ENV !== "production";
-const STYLE_TOLERANCE = 0.35; // convergence gap above which DEV regenerates once
+// Normalised Euclidean over 14 dims for a single SHORT field vs a full-corpus
+// signature is inherently large (~1.5–1.9 even on-voice), so this is a coarse
+// safety net for egregious misses only — not a per-turn tax. LIVE skips the
+// regen entirely (spec §6.4a); the measurement still feeds the reveal bar.
+const STYLE_TOLERANCE = 2.6;
 const FIDELITY_SCOPE: "highdrift" | "all" = "highdrift";
 const FIDELITY_HIGHDRIFT = 0.6; // run the fidelity gate at/above this drift (summary=1.0 always)
 
@@ -77,7 +81,16 @@ function sameSlots(a: string, b: string): boolean {
 function buildSystem(directives: string[], brief: VoiceBrief, drift: number): string {
   const lines = [
     "Render the SAME content in two registers. Change only the SOUND, never the facts.",
-    "Keep every [[slot]] token exactly as written, byte-for-byte.",
+    "",
+    "HARD RULES (both registers) — protect the FACTS, free to change the SOUND:",
+    "- Preserve every fact, number, name, date, party, substantive claim, commitment, recommendation,",
+    "  and request. Do NOT add information or commitments that are not already in the content.",
+    "- Do not alter the substance of the ask (you may re-voice it directly: 'could you tell me about X'",
+    "  → 'Tell me about X' is fine; asking for something DIFFERENT is not).",
+    "- Do not change a legal characterisation (keep 'significant' as 'significant', not 'serious').",
+    "- You MAY change rhythm, sentence order, directness, urgency, and word choice, and you MAY drop",
+    "  purely emotional pleasantries/reassurance ('don't worry', 'you're in good hands') — that is tone.",
+    "- Keep every [[slot]] token exactly as written, byte-for-byte.",
     "",
     "CONDITIONED — style directives (follow precisely):",
     ...directives.map((d) => `- ${d}`),

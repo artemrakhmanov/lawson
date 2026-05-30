@@ -25,13 +25,23 @@ const FidelitySchema = z.object({
     .describe("on failure, the specific semantic departure(s)"),
 });
 
-const SYSTEM =
-  "You are a strict fidelity auditor for a legal-intake system. Two texts render the " +
-  "same content in different registers. Your ONLY job is to confirm they convey " +
-  "IDENTICAL facts, claims, commitments, and asks. IGNORE tone, warmth, length, " +
-  "formality, and phrasing entirely. Flag ONLY semantic departures: a fact added, " +
-  "dropped, or altered; the strength of a claim changed; a new implication, promise, " +
-  "or recommendation introduced. When in doubt that meaning held, return faithful=false.";
+const SYSTEM = [
+  "You are a fidelity auditor for a legal-intake system. Two texts render the same content",
+  "in different registers (one flat, one in a lawyer's voice). The voice is ALLOWED to differ;",
+  "your job is to protect the FACTS, not the tone.",
+  "",
+  "IGNORE entirely (these are register, not meaning): warmth, urgency, directness, politeness,",
+  "formality, length, sentence order, word choice, hedging, and the presence or absence of",
+  "purely emotional pleasantries or reassurance ('don't worry', 'you're in good hands', 'I",
+  "understand this is stressful'). Re-voicing an existing request more or less directly",
+  "(e.g. 'could you tell me about X' → 'Tell me about X') is tone, NOT a change of ask.",
+  "",
+  "Flag faithful=false ONLY for a genuine departure in INFORMATION: a fact, number, name, date,",
+  "or party added / dropped / altered; the substance of a request changed (asking for something",
+  "different); a substantive claim, commitment, recommendation, or legal characterisation added,",
+  "dropped, or reversed. Intensity adjectives that don't change a factual claim are fine.",
+  "If only tone/phrasing changed and every fact, ask, and substantive claim survives, return true.",
+].join("\n");
 
 /**
  * judgeFidelity(substance, baseline, conditioned) -> { faithful, drift_notes? }.

@@ -8,12 +8,16 @@ import { normalise, denormalise } from "./metrics.ts";
 // §5.1 — sub-threshold ramp: opening barely bends, summary lands on the voice.
 // Tunable: if contrast is weak, widen the spread (lower the floor) — don't
 // lengthen it (§5.3).
+// Wide spread, floor at 0.15. Summary tops out at 0.9 (not 1.0): at full lawyer
+// voice the conditioner over-reaches and invents risk characterisations, which
+// the fidelity gate correctly kills → a flat summary. 0.9 stays bold but inside
+// the faithful band so the demo's money-shot panel pops (tuned in D5, §5.3).
 const DRIFT_BY_STAGE: Record<Stage, number> = {
   opening: 0.15,
   q1: 0.4,
   q2: 0.65,
   q3: 0.85,
-  summary: 1.0,
+  summary: 0.9,
 };
 
 export function forStage(stage: Stage): number {
