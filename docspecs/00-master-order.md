@@ -52,7 +52,7 @@ The harness runs **end-to-end on a stage-0 identity passthrough** (baseline == c
 | ✅ | ID | Deliverable | Lane doc | Done when | Commit |
 |----|----|-------------|----------|-----------|--------|
 | ☑ | **B1** | **Harness P1** — `services/ai/client.ts` (the sole harness-side SDK importer) + prompt registry. Read `node_modules/next/dist/docs/01-app/.../route-handlers.md` first (B7). | `lawson/P1-ai-client.md` | A `generateObject`/`generateText` call returns; model id from one constant. | ✦ commit |
-| ☐ | **B2** | **Harness P2** — `slots/encode.ts` (`parse`/`serialize` for `[[key:free:ph]]` + `[[key:select:a\|b\|c]]`) + add `vitest` + `test` script + unit tests. | `lawson/P2-slots.md` | `parse∘serialize` round-trips; `npm test` green on slots. | ✦ commit |
+| ☑ | **B2** | **Harness P2** — `slots/encode.ts` (`parse`/`serialize` for `[[key:free:ph]]` + `[[key:select:a\|b\|c]]`) + add `vitest` + `test` script + unit tests. | `lawson/P2-slots.md` | `parse∘serialize` round-trips; `npm test` green on slots. | ✦ commit |
 
 ## Phase C — Harness spine on stage-0 identity (gate: A2 + B1 + B2)
 
