@@ -1,28 +1,8 @@
-// Scaffold placeholder home page (Spec 00). Spec 04 (Halo) owns `/` and
-// replaces this. It exists to (a) de-brand the create-next-app boilerplate and
-// (b) demonstrate the conventions live: the roster service loaded server-side,
-// and the dumb-component / interactor split (the Example feature). Monochrome.
+// `/` is the Halo intake surface (Spec 04). The throwaway harness tester that
+// stood here through Phase C is gone — Halo supersedes it (U1/G2).
 
-import { Example } from "@/features/example/example";
-import { Lawguistics } from "@/lib/services/lawguistics";
+import { Halo } from "@/features/halo/halo";
 
 export default function Home() {
-  const roster = Lawguistics.listLawyers();
-
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-10 p-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Lawson</h1>
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          Scaffold ready. Halo (Spec 04) replaces this page.
-        </p>
-      </div>
-
-      <Example />
-
-      <p className="text-xs text-muted-foreground">
-        {roster.length} lawyers loaded from the firm roster
-      </p>
-    </main>
-  );
+  return <Halo />;
 }
