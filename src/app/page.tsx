@@ -4,10 +4,10 @@
 // and the dumb-component / interactor split (the Example feature). Monochrome.
 
 import { Example } from "@/features/example/example";
-import { getRoster } from "@/services/signatures";
+import { stubRoster } from "@/lib/services/harness/roster.stub";
 
 export default function Home() {
-  const roster = getRoster();
+  const roster = stubRoster;
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-10 p-8">
