@@ -9,7 +9,7 @@
 import { Lawguistics } from "@/lib/services/lawguistics";
 import type { VoiceSignature } from "@/lib/services/lawguistics";
 import { store, type StoredField, type StoredTurn } from "@/lib/services/session/store";
-import { slotTokens } from "./slots/encode";
+import { slotTokens, parse } from "./slots/encode";
 import type {
   RawTurn, RawSummary, ConditionedView, ConditionedSummary,
 } from "./contracts";
@@ -84,17 +84,44 @@ function assembleSummary(sessionId: string, turnId: string, out: Record<string, 
   };
 }
 
+// Drop slot tokens, keeping only the prose runs. The lawyer signature is
+// measured from corpus that has NO slot tokens, so leaving `[[reason:select:…]]`
+// in the measured text injects bracket/pipe/keyword noise the lawyer side can't
+// have — biasing convergence/LSM. Measure what the user reads as prose.
+function prose(text: string): string {
+  return parse(text)
+    .filter((r) => r.kind === "text")
+    .map((r) => r.text)
+    .join("");
+}
+
 // R5/D6 — per-turn reveal stats, computed DURING intake (never at cleave time).
-// One {convergence, lsm} per turn: measure the turn's combined conditioned text
+// One {convergence, lsm} per turn: measure the turn's combined conditioned prose
 // against the matched lawyer's metric vector. Aggregating the fields yields a
 // stable, low-noise per-turn number — the reveal bar shrinks turn-over-turn.
 function computeStats(target: VoiceSignature, out: Record<string, string>): StoredTurn["stats"] {
-  const text = Object.values(out).join("\n");
+  const text = Object.values(out).map(prose).join("\n");
   const v = Lawguistics.measure(text);
   return {
     convergence: Lawguistics.convergence(v, target.metrics),
     lsm: Lawguistics.lsm(v, target.metrics),
   };
+}
+
+// Bounded-concurrency map — condition fields in parallel (they share no mutable
+// state) without firing all ~8 at the provider at once.
+const CONDITION_CONCURRENCY = 4;
+async function mapPool<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i], i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
 }
 
 export async function emit(
@@ -112,13 +139,18 @@ export async function emit(
   const out: Record<string, string> = {};
   const stored: Record<string, StoredField> = {};
 
-  for (const [name, text] of fields) {
-    // emit is the SOLE caller of Lawguistics.condition.
-    const { conditioned, baseline } = await Lawguistics.condition(text, target, drift);
-    const field = reconcile(text, conditioned, baseline);
-    out[name] = field.conditioned;
-    stored[name] = field;
-  }
+  // Fields are independent (same target/drift, no shared mutable state), so
+  // condition them in parallel under a small cap — a turn's ~8 fields no longer
+  // serialize into ~8 sequential model round-trips. emit is still the SOLE
+  // caller of Lawguistics.condition.
+  const conditioned = await mapPool(fields, CONDITION_CONCURRENCY, async ([, text]) => {
+    const r = await Lawguistics.condition(text, target, drift);
+    return reconcile(text, r.conditioned, r.baseline);
+  });
+  fields.forEach(([name], i) => {
+    out[name] = conditioned[i].conditioned;
+    stored[name] = conditioned[i];
+  });
 
   const turnId = crypto.randomUUID();
   store.putTurn(sessionId, {

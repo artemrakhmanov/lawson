@@ -30,11 +30,13 @@ const SPECIALIST: Record<PracticeArea, AgentId> = {
 
 const heroId = (): string => roster.find((l) => l.hero)?.id ?? roster[0].id;
 
-/** Steering pin (Spec 00 §7) then clamp to a real roster id — the model never
- *  invents an id the rest of the harness can't resolve. */
+/** Resolve to a real roster id. The demo-steering pin (Spec 00 §7) and the
+ *  model's choice are BOTH clamped against the roster — neither can hand emit an
+ *  id that matchTarget can't resolve (an empty/stale pin falls back to the hero,
+ *  never crashes the turn). */
 function resolveLawyerId(modelChoice: string): string {
-  if (config.fixedFallback.enabled) return config.fixedFallback.lawyerId;
-  return roster.some((l) => l.id === modelChoice) ? modelChoice : heroId();
+  const choice = config.fixedFallback.enabled ? config.fixedFallback.lawyerId : modelChoice;
+  return roster.some((l) => l.id === choice) ? choice : heroId();
 }
 
 const specialistFor = (lawyerId: string): AgentId | null => {
