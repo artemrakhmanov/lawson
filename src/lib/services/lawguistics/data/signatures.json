@@ -1,0 +1,323 @@
+{
+  "ranges": {
+    "min": {
+      "meanSentenceLen": 7.113924050632911,
+      "sentenceLenVariance": 15.062970677775999,
+      "ttr": 0.3770599868160844,
+      "hedgeRatio": 0,
+      "directness": 0,
+      "youDensity": 0.001514004542013626,
+      "fnPronoun": 0.041635124905374715,
+      "fnArticle": 0.05338078291814947,
+      "fnPrep": 0.08718861209964412,
+      "fnConj": 0.026690391459074734,
+      "fnAux": 0.026495079485238455,
+      "commaRate": 0.12658227848101267,
+      "questionRate": 0,
+      "dashRate": 0
+    },
+    "max": {
+      "meanSentenceLen": 50.80769230769231,
+      "sentenceLenVariance": 980.2539021852238,
+      "ttr": 0.5963060686015831,
+      "hedgeRatio": 0.00922874093605801,
+      "directness": 0.189873417721519,
+      "youDensity": 0.03558718861209965,
+      "fnPronoun": 0.1423487544483986,
+      "fnArticle": 0.09234828496042216,
+      "fnPrep": 0.14734480179506357,
+      "fnConj": 0.05998681608437706,
+      "fnAux": 0.0870712401055409,
+      "commaRate": 3.064516129032258,
+      "questionRate": 0,
+      "dashRate": 0.5161290322580645
+    }
+  },
+  "rosterMedian": {
+    "meanSentenceLen": 32.41201201201201,
+    "sentenceLenVariance": 436.9241558675792,
+    "ttr": 0.4132581530200051,
+    "hedgeRatio": 0.0037740258339508527,
+    "directness": 0,
+    "youDensity": 0.021430820098688044,
+    "fnPronoun": 0.12199296278065827,
+    "fnArticle": 0.08007379837286618,
+    "fnPrep": 0.1379978625921457,
+    "fnConj": 0.03171029800383822,
+    "fnAux": 0.07767786576367856,
+    "commaRate": 1.9279279279279278,
+    "questionRate": 0,
+    "dashRate": 0.1248062015503876
+  },
+  "signatures": [
+    {
+      "lawyerId": "criminal-risk-01",
+      "metrics": {
+        "meanSentenceLen": 8.813953488372093,
+        "sentenceLenVariance": 30.383991346673863,
+        "ttr": 0.5963060686015831,
+        "hedgeRatio": 0.005277044854881266,
+        "directness": 0.18604651162790697,
+        "youDensity": 0.021108179419525065,
+        "fnPronoun": 0.1266490765171504,
+        "fnArticle": 0.09234828496042216,
+        "fnPrep": 0.10554089709762533,
+        "fnConj": 0.0316622691292876,
+        "fnAux": 0.0870712401055409,
+        "commaRate": 0.13953488372093023,
+        "questionRate": 0,
+        "dashRate": 0.11627906976744186
+      },
+      "brief": {
+        "label": "risk-first, clipped, directive",
+        "cadence": "Short declarative blows followed by a single imperative; sentences rarely exceed fifteen words and never trail off.",
+        "moves": [
+          "Opens with the worst fact first to force immediate attention",
+          "Issues blunt commands stripped of softening language",
+          "Names the specific legal consequence of non-compliance before the client can rationalise inaction",
+          "Closes each email with a hard deadline or a non-negotiable instruction",
+          "Briefly signals his own counter-move to project control without inviting discussion"
+        ],
+        "lexicalFingerprint": [
+          "Do not",
+          "immediately",
+          "serious",
+          "destroy",
+          "exposed",
+          "narrow window",
+          "adjust your expectations",
+          "no exceptions",
+          "by end of week",
+          "before Friday"
+        ],
+        "hedgingPosture": "directive — qualifications appear only when quantifying probability against the client (e.g. 'serious probability'), never to soften commands or cushion bad news; Vane owns the assessment and transfers the risk of inaction squarely to the client",
+        "exemplarLine": "We lost that argument. Adjust your expectations accordingly."
+      }
+    },
+    {
+      "lawyerId": "criminal-02",
+      "metrics": {
+        "meanSentenceLen": 7.113924050632911,
+        "sentenceLenVariance": 15.062970677775999,
+        "ttr": 0.5462633451957295,
+        "hedgeRatio": 0,
+        "directness": 0.189873417721519,
+        "youDensity": 0.03558718861209965,
+        "fnPronoun": 0.1423487544483986,
+        "fnArticle": 0.05338078291814947,
+        "fnPrep": 0.08718861209964412,
+        "fnConj": 0.026690391459074734,
+        "fnAux": 0.08362989323843416,
+        "commaRate": 0.12658227848101267,
+        "questionRate": 0,
+        "dashRate": 0.10126582278481013
+      },
+      "brief": {
+        "label": "risk-first, clipped, command-driven",
+        "cadence": "Short declarative bursts, often one sentence per paragraph, with periodic longer explanatory sentences that land back on a blunt imperative",
+        "moves": [
+          "Opens with stark factual orientation — states the threat before anything else",
+          "Issues numbered or stacked prohibitions in rapid succession",
+          "Withholds reassurance until compliance conditions are met",
+          "Closes with a compressed urgency marker that doubles as a deadline or call to action",
+          "Reframes the client's past decisions as errors without extended moralising"
+        ],
+        "lexicalFingerprint": [
+          "Do not",
+          "immediately",
+          "full stop",
+          "calculus",
+          "exposure",
+          "categorically",
+          "narrow window",
+          "move correctly",
+          "from here forward",
+          "before — not after"
+        ],
+        "hedgingPosture": "directive — qualifications appear only to sharpen the threat, never to soften the instruction; uncertainty is weaponised ('today' after 'you are not the target') rather than used to comfort",
+        "exemplarLine": "I will tell you where you stand after I see the documents. Not before."
+      }
+    },
+    {
+      "lawyerId": "realestate-01",
+      "metrics": {
+        "meanSentenceLen": 48.935483870967744,
+        "sentenceLenVariance": 980.2539021852238,
+        "ttr": 0.3770599868160844,
+        "hedgeRatio": 0.00922874093605801,
+        "directness": 0,
+        "youDensity": 0.021753460777851022,
+        "fnPronoun": 0.11733684904416612,
+        "fnArticle": 0.07712590639419907,
+        "fnPrep": 0.13579433091628212,
+        "fnConj": 0.05998681608437706,
+        "fnAux": 0.07382992748846408,
+        "commaRate": 3.064516129032258,
+        "questionRate": 0,
+        "dashRate": 0.5161290322580645
+      },
+      "brief": {
+        "label": "reassuring, methodical, client-centred warmth",
+        "cadence": "Long, subordinate-clause-laden sentences that loop back to reassure before closing; each sentence carries its own qualification and its own comfort, producing a measured, unhurried forward motion.",
+        "moves": [
+          "Pre-empts client anxiety by naming the worry and then immediately defusing it",
+          "Structures complexity into numbered or sequential stages to create a sense of orderly progress",
+          "Signals transparency explicitly ('I want to be straightforward', 'I wanted to be transparent') before delivering any potentially unsettling information",
+          "Closes each substantive point with an invitation to contact, reinforcing accessibility",
+          "Marks positive milestones with genuine warmth ('genuinely good news', 'rather exciting juncture') to sustain client confidence"
+        ],
+        "lexicalFingerprint": [
+          "entirely",
+          "straightforward",
+          "in my experience",
+          "typically",
+          "I will of course",
+          "proactively on your behalf",
+          "without difficulty",
+          "in a structured and deliberate way",
+          "sensible pace",
+          "I would gently flag",
+          "manageable",
+          "reassuring"
+        ],
+        "hedgingPosture": "balanced — Jonathan offers clear recommendations and anticipated timelines but consistently wraps them in conditional qualifiers ('all things proceeding normally', 'in all likelihood', 'should be able to') and defers final decisions explicitly to the client, avoiding both blunt directiveness and excessive equivocation",
+        "exemplarLine": "I want to be straightforward with you about it while also reassuring you that, in my experience, issues of this nature are typically very manageable and rarely derail a transaction of this kind."
+      }
+    },
+    {
+      "lawyerId": "realestate-02",
+      "metrics": {
+        "meanSentenceLen": 36.13513513513514,
+        "sentenceLenVariance": 413.90065741417084,
+        "ttr": 0.38219895287958117,
+        "hedgeRatio": 0.008975317875841436,
+        "directness": 0,
+        "youDensity": 0.02393418100224383,
+        "fnPronoun": 0.1293941660433807,
+        "fnArticle": 0.08302169035153328,
+        "fnPrep": 0.14734480179506357,
+        "fnConj": 0.05609573672400898,
+        "fnAux": 0.08152580403889305,
+        "commaRate": 2.189189189189189,
+        "questionRate": 0,
+        "dashRate": 0.32432432432432434
+      },
+      "brief": {
+        "label": "reassuring, methodical, client-steadying",
+        "cadence": "Long, layered sentences that open with a calming frame before delivering the substantive point, often closing with an explicit invitation to make contact.",
+        "moves": [
+          "Pre-emptive reassurance: names the concern the client is likely feeling before addressing it",
+          "Normalising the unfamiliar: labels each step or complication as 'routine', 'standard', or 'well-trodden' to reduce anxiety",
+          "Sequenced roadmap: lays out next steps in numbered or ordered prose so the client always knows what comes next",
+          "Explicit instruction: tells the client precisely what action they should take and why",
+          "Warm close with open-door offer: ends every message by inviting contact and signalling continued availability"
+        ],
+        "lexicalFingerprint": [
+          "entirely routine",
+          "I would reassure you",
+          "generally",
+          "well-positioned",
+          "I will be in touch",
+          "please do not hesitate",
+          "manageable",
+          "carefully",
+          "in my experience",
+          "I would encourage you"
+        ],
+        "hedgingPosture": "balanced — qualifies risk with 'generally' and 'typically' to avoid over-promising, but consistently steers toward a positive outcome rather than leaving the client in uncertainty",
+        "exemplarLine": "Settlement, when everything is prepared properly, is generally a smooth and almost anticlimactic event — which is exactly how we like it."
+      }
+    },
+    {
+      "lawyerId": "commercial-01",
+      "metrics": {
+        "meanSentenceLen": 50.80769230769231,
+        "sentenceLenVariance": 891.9245562130179,
+        "ttr": 0.43224829674489024,
+        "hedgeRatio": 0.002271006813020439,
+        "directness": 0,
+        "youDensity": 0.001514004542013626,
+        "fnPronoun": 0.041635124905374715,
+        "fnArticle": 0.09008327024981075,
+        "fnPrep": 0.1461014383043149,
+        "fnConj": 0.02725208175624527,
+        "fnAux": 0.026495079485238455,
+        "commaRate": 2.3076923076923075,
+        "questionRate": 0,
+        "dashRate": 0
+      },
+      "brief": {
+        "label": "precision-dense, enumerated, risk-flagging",
+        "cadence": "Long, architecturally nested opening sentences establish the full transactional frame before shorter, numbered action-items deliver verdict and instruction in sequence.",
+        "moves": [
+          "Opens with a dense scene-setting recital that names all parties, instruments, and key figures before any issue is raised",
+          "Triages issues in numbered series (First / Second / Third), each structured as: fact → risk diagnosis → specific remedy",
+          "Quantifies every risk and recommendation with precise figures, ratios, dates, or thresholds rather than leaving them abstract",
+          "Closes with a hard deadline and a named next step, framing urgency as procedural necessity rather than personal pressure",
+          "Embeds market-standard benchmarking ('market-standard position', 'ordinarily regard as acceptable') to anchor his recommendations as objective rather than advisory preference"
+        ],
+        "lexicalFingerprint": [
+          "I flag",
+          "I strongly recommend",
+          "I propose",
+          "I would characterise",
+          "revert with your instructions",
+          "no later than",
+          "falls outside that threshold",
+          "attendant",
+          "contingent upon",
+          "in my assessment",
+          "serviceable in the base case",
+          "without further slippage"
+        ],
+        "hedgingPosture": "directive — recommendations are framed as near-imperatives backed by quantified risk; qualifications appear only to sharpen the case for action, not to soften it",
+        "exemplarLine": "I flag three matters requiring your instructions before we can progress to execution."
+      }
+    },
+    {
+      "lawyerId": "commercial-02",
+      "metrics": {
+        "meanSentenceLen": 28.68888888888889,
+        "sentenceLenVariance": 459.9476543209876,
+        "ttr": 0.39426800929512007,
+        "hedgeRatio": 0.000774593338497289,
+        "directness": 0,
+        "youDensity": 0.001549186676994578,
+        "fnPronoun": 0.060418280402788536,
+        "fnArticle": 0.06661502711076685,
+        "fnPrep": 0.1402013942680093,
+        "fnConj": 0.031758326878388844,
+        "fnAux": 0.032532920216886134,
+        "commaRate": 1.6666666666666667,
+        "questionRate": 0,
+        "dashRate": 0.13333333333333333
+      },
+      "brief": {
+        "label": "precise, risk-sequenced, directive-advisory",
+        "cadence": "Long, clause-anchored sentences that open with a contractual reference, deliver a crisp assessment, and close with a numbered or enumerated action, creating a steady march from diagnosis to instruction.",
+        "moves": [
+          "Anchors every point to a specific clause, schedule, or defined term before offering any opinion",
+          "Quantifies exposure or commercial imbalance in concrete figures to ground the advice",
+          "Sequences recommendations in priority order, often using 'first … second … third' or numbered lists",
+          "Closes each email with a single, time-bound call to action that transfers the next step to the client",
+          "Issues explicit cautions ('I would caution against…', 'This is unacceptable and must be corrected') to signal non-negotiable positions"
+        ],
+        "lexicalFingerprint": [
+          "I write further to",
+          "I would recommend",
+          "I would advise",
+          "I would caution against",
+          "as currently drafted",
+          "requires amendment",
+          "materially uncertain",
+          "without prejudice",
+          "subject to your instruction",
+          "please confirm",
+          "please revert"
+        ],
+        "hedgingPosture": "directive — Claire states positions and issues instructions rather than floating options; qualifications appear only to flag residual uncertainty on quantum or procedure, never to soften the core recommendation",
+        "exemplarLine": "I would caution against granting consent unconditionally or by conduct: if Solvara proceeds on any lesser basis, the enforceability of the Minimum Annual Purchase Commitment as against NL-UK becomes materially uncertain."
+      }
+    }
+  ]
+}
