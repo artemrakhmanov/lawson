@@ -75,18 +75,36 @@ export function recalibrate(input: { caseState: CaseState; answer: string; roste
   };
 }
 
-/** composeSummary(s) → RawSummary: the one-pager substance, each field slot-bearing. */
+/** composeSummary(s) → RawSummary: the CLIENT's one-pager — communicates their
+ *  position, not the bench's analysis. Slot tokens only where a detail is
+ *  genuinely missing; clean prose when the account is complete. */
 export function composeSummary(input: { caseState: CaseState }): PromptTemplate {
   const s = input.caseState;
   return {
     system: HALO_SYSTEM,
     prompt:
-      `Compose a one-page intake summary from the full transcript.\n\n` +
-      `Matter: "${s.matter.hypothesis}".\n` +
+      `Write the client's intake one-pager — a plain summary of THEIR situation ` +
+      `and what they're seeking, written in their corner. It communicates their ` +
+      `position; it is NOT legal analysis or an answer.\n\n` +
+      `Matter type (working hypothesis): "${s.matter.hypothesis}".\n` +
+      `The person's initial description:\n"""${s.seed}"""\n` +
       `Transcript:\n${transcriptLines(s.transcript)}\n\n` +
-      `Produce: matterType, keyFacts, parties, theAsk. Where a detail is uncertain or ` +
-      `still needs the user's confirmation, leave an inline slot token ` +
-      `[[key:free:placeholder]] rather than guessing. Slots must survive verbatim.`,
+      `Produce four fields, drawn only from what the person actually gave:\n` +
+      `- matterType: a short, plain label for the kind of matter (no verdict).\n` +
+      `- keyFacts: what happened, in plain prose.\n` +
+      `- parties: who is involved.\n` +
+      `- theAsk: what the person wants help with — their goal, as their position.\n\n` +
+      `Hard rules:\n` +
+      `- This is the CLIENT's summary, not the bench's analysis. Do NOT quantify ` +
+      `the case (no dollar values, damages, odds, or "what it's worth"), do NOT ` +
+      `assess the merits or how strong it is, and do NOT state next steps or ` +
+      `advise a course of action. Describe the position; don't answer it.\n` +
+      `- Use ordinary, non-imperative language ("they want…", "the situation is…") ` +
+      `— never "you should" or "we recommend".\n` +
+      `- Prefer clean prose. ONLY when a specific factual detail is genuinely ` +
+      `missing and would need the person to confirm it, leave one inline slot ` +
+      `[[key:free:placeholder]] in its place. If the account is complete, use NO ` +
+      `slots. Any slot tokens must survive verbatim.`,
   };
 }
 

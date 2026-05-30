@@ -50,10 +50,10 @@ const matchShape = {
 const BootstrapSchema = z.object(matchShape);
 const RecalibrateSchema = z.object(matchShape);
 const SummarySchema = z.object({
-  matterType: z.string(),
-  keyFacts: z.string().describe("slot-bearing prose; leave [[key:free:...]] where uncertain"),
-  parties: z.string(),
-  theAsk: z.string(),
+  matterType: z.string().describe("short plain label for the kind of matter — no merits or verdict"),
+  keyFacts: z.string().describe("plain prose of what happened, from the person's own account; a slot only where a detail is genuinely missing"),
+  parties: z.string().describe("who is involved"),
+  theAsk: z.string().describe("what the person is seeking, stated as their position — not advice, merits, or next steps"),
 });
 
 export const Triage = {
