@@ -42,8 +42,8 @@ The harness runs **end-to-end on a stage-0 identity passthrough** (baseline == c
 
 | ✅ | ID | Deliverable | Lane doc | Done when | Commit |
 |----|----|-------------|----------|-----------|--------|
-| ☐ | **A1** | **Harness P0** — install `ai` + `@ai-sdk/anthropic` (zod already present), scaffold `src/lib/services/{harness,ai,session}/` + `features/`, `config.ts` (model id, turn budget N≈3, flags), harness-owned type stubs (**not** the R4-canonical shared types — those come in A2). | `lawson/P0-foundations.md` | `npm run dev` boots clean; deps in `package.json`; dirs + `config.ts` exist. | ✦ commit |
-| ☐ | **A2** | **Lawguistics Stage 0 — the contract.** `types.ts` (R4-canonical shared types), `index.ts` (brand object: `condition`=identity, `drift.forStage`=0, `matchTarget`/`getSignature`=neutral stub sig per R3; rest throw), `ai.ts` (signatures-only stub). | `lawguistics/stage-0-contract.md` | `npx tsc --noEmit` passes; `import { Lawguistics } from "@/lib/services/lawguistics"` type-checks all 9 members; harness can import the shared types. **This is the B2 ack — R1 signature is now frozen.** | ✦ commit |
+| ☑ | **A1** | **Harness P0** — install `ai` + `@ai-sdk/anthropic` (zod already present), scaffold `src/lib/services/{harness,ai,session}/` + `features/`, `config.ts` (model id, turn budget N≈3, flags), harness-owned type stubs (**not** the R4-canonical shared types — those come in A2). | `lawson/P0-foundations.md` | `npm run dev` boots clean; deps in `package.json`; dirs + `config.ts` exist. | ✦ commit |
+| ☑ | **A2** | **Lawguistics Stage 0 — the contract.** `types.ts` (R4-canonical shared types), `index.ts` (brand object: `condition`=identity, `drift.forStage`=0, `matchTarget`/`getSignature`=neutral stub sig per R3; rest throw), `ai.ts` (signatures-only stub). | `lawguistics/stage-0-contract.md` | `npx tsc --noEmit` passes; `import { Lawguistics } from "@/lib/services/lawguistics"` type-checks all 9 members; harness can import the shared types. **This is the B2 ack — R1 signature is now frozen.** | ✦ commit |
 
 > A2 is the gate the whole build pivots on. ~15 min of work; do it deliberately because every later row codes against it.
 
