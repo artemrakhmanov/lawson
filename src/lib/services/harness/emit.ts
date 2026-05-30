@@ -56,9 +56,10 @@ function summaryFields(s: RawSummary): [string, string][] {
   ];
 }
 
-function assembleTurn(t: RawTurn, turnId: string, out: Record<string, string>): ConditionedView {
+function assembleTurn(t: RawTurn, sessionId: string, turnId: string, out: Record<string, string>): ConditionedView {
   return {
     kind: "turn",
+    sessionId,
     turnId,
     agentId: t.agentId,
     stage: t.stage,
@@ -71,9 +72,10 @@ function assembleTurn(t: RawTurn, turnId: string, out: Record<string, string>): 
   };
 }
 
-function assembleSummary(turnId: string, out: Record<string, string>): ConditionedSummary {
+function assembleSummary(sessionId: string, turnId: string, out: Record<string, string>): ConditionedSummary {
   return {
     kind: "summary",
+    sessionId,
     turnId,
     matterType: out.matterType,
     keyFacts: out.keyFacts,
@@ -121,5 +123,5 @@ export async function emit(
     stats: computeStatsIfReal(target, out),
   });
 
-  return "agentId" in raw ? assembleTurn(raw, turnId, out) : assembleSummary(turnId, out);
+  return "agentId" in raw ? assembleTurn(raw, sessionId, turnId, out) : assembleSummary(sessionId, turnId, out);
 }

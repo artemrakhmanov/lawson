@@ -66,6 +66,7 @@ export type CaseState = {
 // baseline pair is persisted server-side and never sent during intake.
 export type ConditionedView = {
   kind: "turn";
+  sessionId: string;            // stamped by emit so the client can drive answer()/cleave
   turnId: string;
   agentId: AgentId;
   stage: Stage;
@@ -79,6 +80,7 @@ export type ConditionedView = {
 
 export type ConditionedSummary = {
   kind: "summary";
+  sessionId: string;            // stamped by emit (see ConditionedView)
   turnId: string;
   matterType: string;
   keyFacts: string;

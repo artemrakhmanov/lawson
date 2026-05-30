@@ -50,6 +50,7 @@ describe("emit — stage-0 identity gateway (C1)", () => {
     // shape (contracts §1.8)
     expect(view.kind).toBe("turn");
     if (view.kind !== "turn") throw new Error("expected turn");
+    expect(view.sessionId).toBe(id);
     expect(view.agentId).toBe("criminal");
     expect(view.stage).toBe("q1");
     expect(view.turnId).toBeTruthy();
