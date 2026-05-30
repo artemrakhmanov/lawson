@@ -12,7 +12,7 @@ Build the **pipes before the water** (Spec 02): the whole harness runs end-to-en
 
 ## The hard gate
 
-**P3 cannot start until the Lawguistics workers ack the `Lawguistics` interface** (`01-contracts.md §2.1`, blocker **B2**). Everything before P3 is interface-independent and can proceed immediately.
+**P3 cannot start until Lawguistics Stage 0 (master-order row A2) has landed** — it ships `lawguistics/index.ts`/`types.ts`, the acked B2 interface (resolved in [`../00-master-order.md`](../00-master-order.md), **R1/R2**). Everything before P3 is interface-independent and can proceed immediately. Per **R2** the harness no longer ships any `lawguistics/**` file — the voice lane owns the whole dir, including the stage-0 identity.
 
 ## Phase ladder & dependencies
 
@@ -21,7 +21,7 @@ P0 Foundations ─┬─> P1 AI client ──────────┐
                 ├─> P2 Slots (pure TS) ─────┤
                 └─> (contracts as TS stubs) │
                                             ▼
-                       [B2 ack gate] ──> P3 Seam + Store + Gateway
+                   [A2: Lawguistics Stage 0] ──> P3 Store + Gateway
                                             │
                                             ▼
                                          P4 Triage ──> P5 Bench ──> P6 Loop (Lawson)
@@ -38,7 +38,7 @@ P0 Foundations ─┬─> P1 AI client ──────────┐
 | P0 | `P0-foundations.md` | Install deps, scaffold dirs, `config.ts`, contract type stubs | — |
 | P1 | `P1-ai-client.md` | `ai/client.ts` (sole SDK importer) + prompt registry | P0 |
 | P2 | `P2-slots.md` | `slots/encode.ts` typed slots + `parse`/`serialize` (+ tests) | P0 |
-| P3 | `P3-seam-store-gateway.md` | Lawguistics stub + `session/store.ts` + `emit.ts` gateway | P0, P1, P2, **B2 ack** |
+| P3 | `P3-seam-store-gateway.md` | `session/store.ts` + `emit.ts` gateway (consumes A2's `Lawguistics`; no `lawguistics/**` files, R2) | P0, P1, P2, **A2** |
 | P4 | `P4-triage.md` | `triage.ts` bootstrap/select/recalibrate/composeSummary + matching | P1, P3 |
 | P5 | `P5-bench.md` | Five `composeTurn` agent modules | P1, P3 |
 | P6 | `P6-loop.md` | `loop.ts` (`Lawson`) — holds caseState, sole `emit` caller | P3, P4, P5 |

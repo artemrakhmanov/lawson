@@ -50,7 +50,7 @@ The **only** surface other modules touch — the `Lawguistics` brand object plus
 - `Lawguistics.convergence(output, lawyer) -> number`, `Lawguistics.lsm(a, b) -> number`
 - `Lawguistics.getSignature(lawyerId) -> VoiceSignature`, `Lawguistics.getLawyer(id) -> Lawyer`, `Lawguistics.matchTarget(lawyerId) -> VoiceSignature`
 
-**Contract gap surfaced (additive, non-breaking):** Spec 02's seam is `condition(text, target, drift)` but drift is defined as client→lawyer interpolation (§5), and this isolated module can't read the harness session store. Resolution: add optional `origin?: MetricVector`. Omitted → interpolate from a **frozen roster-median (neutral)** vector; when ready the harness passes the captured client vector. The 3-arg call stays valid. **Flag this to whoever owns the Spec 02 seam.**
+**Contract gap — RESOLVED (R1, see [`../00-master-order.md`](../00-master-order.md)):** the frozen seam is `condition(text, target: VoiceSignature, drift, origin?: MetricVector)`. The harness's `emit` resolves `lawyerId → VoiceSignature` via `matchTarget()` and passes the signature, omitting `origin` → interpolate from the **frozen roster-median (neutral)** vector; when the harness later captures the client vector it passes it as `origin`. The 3-arg call stays valid.
 
 ## Stage DAG (for parallel agents)
 

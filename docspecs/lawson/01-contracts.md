@@ -4,7 +4,9 @@
 >
 > **Per Spec 00 §5, field names stay provisional until consumed** — but the *intent and the seam boundaries* below are the contract. Where a shape is still genuinely open, it is marked. Two tiers:
 > - **Harness-owned, frozen** — I author and own these; other teams treat them as fixed.
-> - **Cross-team, PROPOSED** — shared files awaiting the Lawguistics workers' ack (see `02-seams-and-blockers.md`, B2). Do not treat as final until acked.
+> - **Cross-team** (§2) — shared files owned by the voice lane. Originally PROPOSED pending the Lawguistics ack (B2); **now acked and frozen** by the master order (R1) — see the resolution note below.
+>
+> **Resolution status:** the cross-team seam (§2) is now **acked and frozen** by [`../00-master-order.md`](../00-master-order.md) (R1–R7), which is authoritative where this doc differs. The R4-shared types (`Stage`, `Lawyer`, `PracticeArea`, `MetricVector`, `VoiceSignature`, `ConditionResult`, `MetricRanges`) are **canonical in `lawguistics/types.ts`**; the harness imports/re-exports them rather than redeclaring. Shapes below marked "(re-export)" are owned by the voice lane.
 
 All paths assume the `@/*` → `src/` alias. Harness home: `src/lib/services/harness/`.
 
@@ -20,7 +22,7 @@ The lifecycle marker every emitted unit carries. `emit` reads it to ask Lawguist
 export type Stage = 'opening' | 'q1' | 'q2' | 'q3' | 'summary';
 ```
 
-> **Shared signal, harness-frozen labels.** The *labels* are frozen here (agents tag, `emit` reads). The *drift value per stage* is **not** defined here — that is a Lawguistics voice-tuning decision (see §2.2 and B3). If the turn budget changes, the `q*` ladder extends; keep `opening` first and `summary` last.
+> **Shared signal, harness-frozen labels.** The *labels* are harness-decided (agents tag, `emit` reads) and identical to `lawguistics/types.ts`. Per **R4** the TS type physically lives in `lawguistics/types.ts` (one definition both lanes import); the harness re-exports it. The *drift value per stage* is **not** defined here — that is a Lawguistics voice-tuning decision (see §2.2 and B3). If the turn budget changes, the `q*` ladder extends; keep `opening` first and `summary` last.
 
 ### 1.2 Slot encoding (`harness/slots/encode.ts`)
 
@@ -49,18 +51,21 @@ export function serialize(runs: Run[]): string;   // runs → token text (round-
 
 Filling slots with user values and folding them into a final answer string is a **caller** concern (the interactor / tester), not `encode.ts`. `encode.ts` is pure, zero-dep, UI-free.
 
-### 1.3 Lawyer & roster
+### 1.3 Lawyer & roster (re-export — canonical in `lawguistics/types.ts`, R4)
 
-The shape Triage matches against. Real data (`firm.json`) is Lawguistics-owned (B1); the harness ships a stub roster behind this exact shape.
+The shape Triage matches against. Real data (`firm.json`) is Lawguistics-owned (B1); the harness ships a stub roster behind this exact shape. Per **R4** the `Lawyer`/`PracticeArea` types are **canonical in `lawguistics/types.ts`** (A2) — the harness re-exports them; it does not redeclare. Note **PascalCase** `PracticeArea` (was lowercase `'criminal'` in an earlier draft — now aligned to the voice lane).
 
 ```ts
+// from lawguistics/types.ts (R4):
+export type PracticeArea = "Criminal" | "RealEstate" | "Commercial";
 export type Lawyer = {
   id: string;
   meta: { name: string; title: string };
-  practiceArea: string;       // e.g. 'criminal' | 'real-estate' | 'commercial'
+  practiceArea: PracticeArea;
   summary: string;            // prose Triage matches the evolving matter against
   hero?: boolean;             // exactly one true — the demo's bold-voice target
 };
+// harness-local convenience alias:
 export type Roster = Lawyer[];
 ```
 
@@ -192,7 +197,8 @@ Walks each register-bearing field → `Lawguistics.condition(field, target, drif
 
 ```ts
 type StoredField = { conditioned: string; baseline: string };
-type StoredTurn = { turnId: string; stage: Stage; fields: Record<string, StoredField> };
+// R5: stats are populated by emit only once Lawguistics is real (Phase D); absent at stage-0.
+type StoredTurn = { turnId: string; stage: Stage; fields: Record<string, StoredField>; stats?: { convergence: number; lsm: number } };
 type SessionRecord = { caseState: CaseState; turns: StoredTurn[] };
 
 export const store: {
@@ -224,37 +230,39 @@ Map 1:1 to `Lawson` methods; own all model work; return the **conditioned** view
 POST /api/lawson/start            { seed }                     → ConditionedView
 POST /api/lawson/answer           { sessionId, turnId, payload }→ ConditionedView | ConditionedSummary (+ done)
 POST /api/lawson/refresh-summary  { sessionId, fills }         → ConditionedSummary
+GET  /api/session/[id]            —                            → { turns: StoredTurn[]; signature: VoiceBrief }  // R6
 ```
+
+> **R6 — the cleave read route.** `GET /api/session/[id]` is a **pure read** (store + `getSignature().brief`); **no model call**. It returns both registers per field + persisted `stats` so the cleave (Spec 04) can unhide baselines and draw reveal furniture without generating. Built by the **UX lane (U5)**, not the harness phases — listed here because it completes the contract surface.
 
 ---
 
-## 2. Cross-team, PROPOSED — awaiting Lawguistics ack (B2)
+## 2. Cross-team seam — ACKED & FROZEN (was PROPOSED; resolved by R1)
 
-> These are the seam. The harness ships a stage-0 stub behind them so it runs end-to-end now, but the *signatures* must be confirmed by the Lawguistics workers before P3 and their mock build. Surface any disagreement on paper first.
+> These are the seam. **Owned by the voice lane** (`lawguistics/index.ts` + `types.ts`), shipped first as build row **A2**; the harness consumes them and never edits `lawguistics/**` (R2). The signature below is the **resolved** form — it supersedes the earlier `Target = { lawyerId }` proposal.
 
-### 2.1 The `Lawguistics` interface (`services/lawguistics/index.ts`)
+### 2.1 The `Lawguistics` interface (`services/lawguistics/index.ts`) — R1
 
 ```ts
-export interface Lawguistics {
-  condition(text: string, target: Target, drift: number): Promise<{ conditioned: string; baseline: string }>;
+export const Lawguistics: {
+  condition(text: string, target: VoiceSignature, drift: number, origin?: MetricVector): Promise<{ conditioned: string; baseline: string }>;
   drift: { forStage(stage: Stage): number };
-}
+  matchTarget(lawyerId: string): VoiceSignature;   // emit resolves the target through this
+  // …measure / convergence / lsm / getSignature / getLawyer / judgeFidelity — see lawguistics/stage-0-contract.md
+};
 ```
 
 Contract the harness depends on:
+- `condition` takes a **resolved `VoiceSignature`** (not `{ lawyerId }`). `emit` calls `Lawguistics.matchTarget(caseState.lawyerMatch.lawyerId)` to get it, then passes it — omitting `origin` (defaults to `ROSTER_MEDIAN` inside Lawguistics).
 - Returns **both registers of the same substance** — facts identical, only *sound* differs.
 - **Slot tokens returned byte-identical.** `emit` validates; violation → fall back to baseline.
 - `text` may be any single register-bearing field (may contain slot tokens).
 
-### 2.2 `Target` and drift values — Lawguistics-owned, referenced only
+### 2.2 Resolution & drift values — Lawguistics-owned
 
-```ts
-export type Target = { lawyerId: string };   // PROPOSED minimal shape
-```
-
-- The harness only needs `target` to be **resolvable from `lawyerId`** (`caseState.lawyerMatch.lawyerId`). Whether `condition` internally resolves it to a `VoiceSignature` is the Lawguistics team's business.
-- **Stage-0 ignores `target` and `drift` entirely** (identity passthrough), so the harness is unblocked regardless of how these are finalized.
-- The `VoiceSignature` shape and the per-stage **drift values** (e.g. `{opening:0.15, q1:0.4, …, summary:1.0}`) are **authored by the Lawguistics team**, not here. The harness ships `drift.forStage = () => 0` for stage-0.
+- **R1 resolved:** `target` is the resolved `VoiceSignature`; the harness no longer passes a bare `{ lawyerId }`. `VoiceSignature`/`MetricVector` shapes are canonical in `lawguistics/types.ts` (R4); the harness imports them.
+- **Stage-0 ignores `target`, `drift`, and `origin`** (identity passthrough), so the harness is unblocked regardless; `matchTarget`/`getSignature` return a frozen **neutral signature** at stage-0 (R3) so emit's resolve call works.
+- The per-stage **drift values** (e.g. `{opening:0.15, q1:0.4, …, summary:1.0}`) are **authored by the Lawguistics team** in `drift.ts`. Stage-0 `drift.forStage` returns `0`.
 
 ---
 

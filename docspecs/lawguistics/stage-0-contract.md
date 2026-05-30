@@ -1,12 +1,14 @@
 # Stage 0 — The Contract (`types.ts` + stubbed `index.ts`)
 
 > **Build this first. It blocks everything.** ~15 min. Once it lands, harness/UI agents import the real shape and stop being blocked; every other Lawguistics stage codes against these types. See `00-overview.md` for isolation rules. Spec refs → `docspecs/03-lawguistics-module.md`.
+>
+> **Cross-lane conflicts here are resolved in [`../00-master-order.md`](../00-master-order.md) (R1–R7), which is authoritative where this doc differs.** This is build row **A2** — the B2 ack. The stage-0 `index.ts` below ships **runnable** stubs (R3) so the harness runs end-to-end on identity before real voice exists.
 
 ## Goal
 
 Pin the module's type contract and a stubbed public surface so:
 1. parallel agents (1a/1b/1c) build against fixed types with no churn;
-2. harness/UI agents can `import { Lawguistics } from "@/lib/services/lawguistics"` immediately (functions exist, throw "not implemented", but type-check).
+2. harness/UI agents can `import { Lawguistics } from "@/lib/services/lawguistics"` immediately. Per **R3**, the methods the stage-0 harness actually calls are **runnable stubs** — `condition` → identity, `drift.forStage` → `0`, `matchTarget`/`getSignature` → a frozen neutral signature — so the harness runs end-to-end. The rest (`measure`/`convergence`/`lsm`/`judgeFidelity`/`getLawyer`) throw `not implemented` until their stages land; stage-0 intake never calls them.
 
 ## Files to create
 
@@ -89,25 +91,37 @@ export type FnKey = (typeof FN_KEYS)[number];
 import type {
   MetricVector, VoiceSignature, Lawyer, Stage, ConditionResult, FidelityResult,
 } from "./types";
+import { METRIC_KEYS } from "./types";   // runtime value — for the neutral metric vector below
 
 const NOT_IMPL = (n: string) => { throw new Error(`Lawguistics.${n} not implemented yet`); };
 
+// R3 — the runnable stage-0 surface (see ../00-master-order.md). A frozen neutral signature
+// is returned by matchTarget/getSignature so the harness's emit can resolve a target and call
+// condition; stage-0 condition ignores target/drift and identity-passes. Real impls land Stage 3.
+const NEUTRAL_METRICS = Object.fromEntries(METRIC_KEYS.map((k) => [k, 0])) as MetricVector;
+const NEUTRAL_SIGNATURE: VoiceSignature = {
+  lawyerId: "__neutral__",
+  metrics: NEUTRAL_METRICS,
+  brief: { label: "neutral", cadence: "", moves: [], lexicalFingerprint: [], hedgingPosture: "balanced", exemplarLine: "" },
+};
+
 export const Lawguistics = {
-  condition(_text: string, _target: VoiceSignature, _drift: number, _origin?: MetricVector): Promise<ConditionResult> {
-    return NOT_IMPL("condition");
+  // identity passthrough: baseline == conditioned, slots trivially preserved (R3)
+  condition(text: string, _target: VoiceSignature, _drift: number, _origin?: MetricVector): Promise<ConditionResult> {
+    return Promise.resolve({ conditioned: text, baseline: text });
   },
   judgeFidelity(_substance: string, _baseline: string, _conditioned: string): Promise<FidelityResult> {
     return NOT_IMPL("judgeFidelity");
   },
   drift: {
-    forStage(_stage: Stage): number { return NOT_IMPL("drift.forStage"); },
+    forStage(_stage: Stage): number { return 0; },   // stage-0 ignores drift
   },
   measure(_text: string): MetricVector { return NOT_IMPL("measure"); },
   convergence(_output: MetricVector, _lawyer: MetricVector): number { return NOT_IMPL("convergence"); },
   lsm(_a: MetricVector, _b: MetricVector): number { return NOT_IMPL("lsm"); },
-  getSignature(_lawyerId: string): VoiceSignature { return NOT_IMPL("getSignature"); },
+  getSignature(_lawyerId: string): VoiceSignature { return NEUTRAL_SIGNATURE; },   // R3 neutral stub
   getLawyer(_id: string): Lawyer { return NOT_IMPL("getLawyer"); },
-  matchTarget(_lawyerId: string): VoiceSignature { return NOT_IMPL("matchTarget"); },
+  matchTarget(_lawyerId: string): VoiceSignature { return NEUTRAL_SIGNATURE; },     // R3 neutral stub
 };
 
 export type {
@@ -138,6 +152,8 @@ export const MODEL = process.env.LAWGUISTICS_MODEL ?? "claude-opus-4-8";
 - **`condition` is `async` and returns `Promise<ConditionResult>`.** Harness `await`s it.
 - **`origin?: MetricVector` is part of the signature** (the contract gap fix). Document in the JSDoc that omission ⇒ roster-median origin.
 - **`METRIC_KEYS`/`FN_KEYS` are the canonical dimension lists** — all iteration goes through them.
+- **R1 — `condition(text, target: VoiceSignature, drift, origin?)` is the frozen seam signature.** The harness's `emit` resolves `lawyerId → VoiceSignature` via `matchTarget()` and passes the signature (omitting `origin`). This supersedes the harness's older `Target = { lawyerId }` proposal.
+- **R3/R4 — this file is the canonical home** of `Stage`, `Lawyer`, `PracticeArea`, `MetricVector`, `VoiceSignature`, `VoiceBrief`, `ConditionResult`, `MetricRanges`; the harness **imports/re-exports** these, never redeclares them.
 
 ## Dependencies / what it gates
 

@@ -19,6 +19,7 @@ POST /api/lawson/refresh-summary  { sessionId, fills }           → Conditioned
 ```
 - 1:1 with `Lawson` methods; thin — parse body, call `Lawson`, return JSON.
 - Return the **conditioned view only**. Baseline stays in the store until the cleave (Spec 04) reads it server-side. **No baseline crosses the wire during intake.**
+- **Out of scope here (R6):** the cleave read route `GET /api/session/[id]` (returns stored both-register turns + `stats` + `getSignature().brief`, no model call) is built by the **UX lane (U5)**, not this phase. Listed in `01-contracts.md §1.14` for completeness.
 - **Read `node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md` before writing these** — Next 16.2.6 has breaking changes vs. training data (B7). Honor its current Route Handler signature/exports and any deprecation notices.
 - `sessionId` issued by `start` (in body of the first response or a cookie — pick the doc-blessed pattern).
 
