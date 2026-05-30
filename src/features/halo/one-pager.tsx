@@ -4,11 +4,14 @@
 // before the cleave (Spec 04 §4). Rendered through the SAME slot-renderer as the
 // scaffolds, so inline fills behave identically (instant, local). The explicit
 // Refresh is the ONLY thing that hits the model here — the single deliberate
-// "model beat"; never auto-refresh on keystroke. Dumb component.
+// "model beat"; never auto-refresh on keystroke. Animated title + staggered
+// fields, matching the intake. Dumb component.
 
 import type { ConditionedSummary } from "@/lib/services/harness/contracts";
 import { SlotRenderer } from "./slot-renderer";
 import { Button } from "@/components/ui/button";
+import { TextGenerateEffect } from "@/components/custom/text-generate-effect";
+import { Stagger, Item } from "./reveal";
 
 const FIELDS = [
   { key: "keyFacts", label: "Key facts" },
@@ -20,38 +23,53 @@ export function OnePager({
   summary,
   fills,
   pending,
+  interactive = true,
   onFillSlot,
   onRefresh,
 }: {
   summary: ConditionedSummary;
   fills: Record<string, string>;
   pending: boolean;
+  interactive?: boolean;
   onFillSlot: (key: string, value: string) => void;
   onRefresh: () => void;
 }) {
+  const locked = pending || !interactive;
+
   return (
     <div className="measure flex w-full flex-col gap-8">
-      <header className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <span className="text-xs uppercase tracking-widest text-muted-foreground">Your matter</span>
-        <h2 className="text-2xl font-medium tracking-tight md:text-3xl">{summary.matterType}</h2>
-      </header>
-
-      <dl className="flex flex-col gap-6">
-        {FIELDS.map(({ key, label }) => (
-          <div key={key} className="flex flex-col gap-2">
-            <dt className="text-xs uppercase tracking-widest text-muted-foreground">{label}</dt>
-            <dd className="text-lg">
-              <SlotRenderer text={summary[key]} values={fills} onChange={onFillSlot} namespace={key} />
-            </dd>
-          </div>
-        ))}
-      </dl>
-
-      <div className="border-t border-border pt-6">
-        <Button variant="ghost" size="sm" disabled={pending} onClick={onRefresh}>
-          Refresh this summary
-        </Button>
+        <TextGenerateEffect
+          words={summary.matterType}
+          textClassName="text-xl font-medium leading-snug tracking-tight text-foreground md:text-2xl"
+        />
       </div>
+
+      <Stagger className="flex flex-col gap-6">
+        {FIELDS.map(({ key, label }) => (
+          <Item key={key} className="flex flex-col gap-2">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
+            <div className="text-base">
+              <SlotRenderer
+                text={summary[key]}
+                values={fills}
+                onChange={onFillSlot}
+                namespace={key}
+                readOnly={locked}
+              />
+            </div>
+          </Item>
+        ))}
+
+        {interactive && (
+          <Item>
+            <Button variant="ghost" size="sm" disabled={locked} onClick={onRefresh}>
+              Refresh this summary
+            </Button>
+          </Item>
+        )}
+      </Stagger>
     </div>
   );
 }

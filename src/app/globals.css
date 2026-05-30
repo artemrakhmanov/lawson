@@ -138,3 +138,30 @@
     margin-inline: auto;
   }
 }
+
+/* Greyscale shimmer — functional cover for routing latency (G4 wait state). A
+   quiet light band sweeps a muted block; pure greyscale, no decoration. */
+@keyframes lawson-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@layer utilities {
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(1 0 0 / 0.55),
+      transparent
+    );
+    animation: lawson-shimmer 1.6s ease-in-out infinite;
+  }
+}

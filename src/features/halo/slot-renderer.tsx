@@ -1,16 +1,55 @@
 "use client";
 
-// slot-renderer.tsx — Halo's inline fill-in-the-blank renderer (Spec 04 §3).
-// Parses a CONDITIONED, slot-bearing string with the P2 parse() and renders it
-// as a sentence: text → prose <span>, free → inline auto-sizing input, select →
-// inline native dropdown. Controlled — the parent owns the `values` map and gets
-// instant onChange (no network; the fillSlot gesture). Strictly monochrome; the
-// interaction states are greyscale only. `readOnly` powers the cleave's static
-// panels later (G5). The richer micro-interactions land in U2 (G3); this is the
-// functional base the intake surface (U1) needs to be answerable.
+// slot-renderer.tsx — Halo's inline fill-in-the-blank renderer (Spec 04 §3, G3).
+// Parses a CONDITIONED, slot-bearing string with the P2 parse() and renders it as
+// a sentence: text → prose, free → inline auto-sizing input, select → inline
+// dropdown. Controlled — the parent owns `values` and gets instant onChange (no
+// network; the fillSlot gesture). Greyscale states only (G3): empty reads as a
+// dashed blank to fill, hover/focus thickens the underline, a filled slot reads
+// at full foreground weight so the finished scaffold is a clean sentence. The
+// free input auto-grows via a hidden sizer span (inline-grid) so the sentence
+// reflows naturally. `readOnly` powers the cleave's static panels (G5).
 
 import { parse } from "@/lib/services/harness/slots/encode";
 import { cn } from "@/lib/utils";
+
+function FreeSlot({
+  id,
+  value,
+  placeholder,
+  readOnly,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  placeholder: string;
+  readOnly?: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    // inline-grid overlay: the sizer span and the input share one cell, so the
+    // input's width tracks the rendered text (proportional fonts included).
+    <span className="relative mx-1 inline-grid align-baseline">
+      <span aria-hidden className="invisible col-start-1 row-start-1 whitespace-pre px-1">
+        {value || placeholder || " "}
+      </span>
+      <input
+        id={id}
+        name={id}
+        value={value}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "col-start-1 row-start-1 w-full bg-transparent px-1 text-center outline-none transition-colors",
+          "border-b placeholder:text-muted-foreground/40",
+          value ? "border-foreground/70 text-foreground" : "border-dashed border-muted-foreground/50",
+          !readOnly && "hover:border-foreground/60 focus:border-foreground",
+        )}
+      />
+    </span>
+  );
+}
 
 export function SlotRenderer({
   text,
@@ -22,7 +61,6 @@ export function SlotRenderer({
   text: string;
   values: Record<string, string>;
   onChange?: (key: string, value: string) => void;
-  // Scopes slot state so the same key in two fields doesn't collide; also keys DOM ids.
   namespace?: string;
   readOnly?: boolean;
 }) {
@@ -37,23 +75,14 @@ export function SlotRenderer({
         const domId = `${namespace ?? "slot"}-${r.key}-${i}`;
 
         if (r.type === "free") {
-          const ch = Math.max(val.length, r.placeholder.length, 6) + 1;
           return (
-            <input
+            <FreeSlot
               key={i}
               id={domId}
-              name={domId}
               value={val}
               placeholder={r.placeholder}
               readOnly={readOnly}
-              onChange={(e) => onChange?.(sk, e.target.value)}
-              style={{ width: `${ch}ch` }}
-              className={cn(
-                "mx-1 inline border-0 border-b bg-transparent text-center align-baseline outline-none transition-colors",
-                "placeholder:text-muted-foreground/50",
-                val ? "border-foreground/70 text-foreground" : "border-muted-foreground/40",
-                !readOnly && "focus:border-foreground",
-              )}
+              onChange={(v) => onChange?.(sk, v)}
             />
           );
         }
@@ -67,9 +96,9 @@ export function SlotRenderer({
             disabled={readOnly}
             onChange={(e) => onChange?.(sk, e.target.value)}
             className={cn(
-              "mx-1 inline cursor-pointer border-0 border-b bg-transparent align-baseline outline-none transition-colors",
-              val ? "border-foreground/70 text-foreground" : "border-muted-foreground/40 text-muted-foreground/60",
-              !readOnly && "focus:border-foreground",
+              "mx-1 inline cursor-pointer border-b bg-transparent align-baseline outline-none transition-colors",
+              val ? "border-foreground/70 text-foreground" : "border-dashed border-muted-foreground/50 text-muted-foreground/70",
+              !readOnly && "hover:border-foreground/60 focus:border-foreground",
             )}
           >
             <option value="" disabled>

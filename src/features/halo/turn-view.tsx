@@ -18,12 +18,16 @@ import { Textarea } from "@/components/ui/textarea";
 export function TurnView({
   view,
   pending,
+  interactive = true,
   onAnswer,
 }: {
   view: ConditionedView;
   pending: boolean;
+  // false when revisiting a past step — render read-only, no harness input.
+  interactive?: boolean;
   onAnswer: (payload: AnswerPayload) => void;
 }) {
+  const locked = pending || !interactive;
   const [scaffoldFills, setScaffoldFills] = useState<Record<number, Record<string, string>>>({});
   const [freeform, setFreeform] = useState("");
 
@@ -38,57 +42,63 @@ export function TurnView({
 
   return (
     <Panel
-      preamble={view.preamble}
       question={view.question}
       framing={view.framing}
       scaffolds={view.scaffolds}
       reassurance={view.reassurance}
       renderScaffold={(sc, idx) => (
-        <div className="group flex flex-col gap-3">
-          <div className="text-lg">
+        <div className="group flex items-center justify-between gap-4 rounded-lg border border-border/70 px-4 py-3 transition-colors hover:border-foreground/30">
+          <div className="text-base">
             <SlotRenderer
               text={sc}
               values={scaffoldFills[idx] ?? {}}
               onChange={(k, v) => setScaffoldFill(idx, k, v)}
               namespace={`sc-${idx}`}
+              readOnly={locked}
             />
           </div>
-          <div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pending}
+          {interactive && (
+            <button
+              type="button"
+              disabled={locked}
               onClick={() => onAnswer({ kind: "scaffold", index: idx, fills: scaffoldFills[idx] ?? {} })}
+              className="shrink-0 text-sm text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-0"
             >
-              Use this
-            </Button>
-          </div>
+              Use this →
+            </button>
+          )}
         </div>
       )}
       footer={
-        <div className="flex flex-col gap-3 border-t border-border pt-6">
-          <label className="text-sm text-muted-foreground">{view.freeform.placeholder}</label>
-          <Textarea
-            value={freeform}
-            onChange={(e) => setFreeform(e.target.value)}
-            disabled={pending}
-            rows={2}
-            className="resize-none"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && freeform.trim()) {
-                onAnswer({ kind: "freeform", text: freeform.trim() });
-              }
-            }}
-          />
-          <div>
-            <Button
-              disabled={pending || !freeform.trim()}
-              onClick={() => onAnswer({ kind: "freeform", text: freeform.trim() })}
-            >
-              Continue
-            </Button>
+        interactive ? (
+          <div className="flex flex-col gap-3 pt-2">
+            <label className="text-xs uppercase tracking-widest text-muted-foreground">
+              Or answer in your own words
+            </label>
+            <Textarea
+              value={freeform}
+              onChange={(e) => setFreeform(e.target.value)}
+              disabled={locked}
+              rows={2}
+              placeholder={view.freeform.placeholder}
+              className="resize-none border-0 border-b border-border bg-transparent px-0 text-base leading-relaxed shadow-none focus-visible:border-foreground focus-visible:ring-0"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && freeform.trim()) {
+                  onAnswer({ kind: "freeform", text: freeform.trim() });
+                }
+              }}
+            />
+            <div className="flex items-center gap-4">
+              <Button
+                disabled={locked || !freeform.trim()}
+                onClick={() => onAnswer({ kind: "freeform", text: freeform.trim() })}
+              >
+                Continue
+              </Button>
+              <span className="text-xs text-muted-foreground">⌘ + ↵</span>
+            </div>
           </div>
-        </div>
+        ) : null
       }
     />
   );
