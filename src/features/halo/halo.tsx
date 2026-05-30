@@ -21,6 +21,7 @@ import { OnePager } from "./one-pager";
 import { ProgressCapsule } from "./progress-capsule";
 import { StepBridge } from "./step-bridge";
 import { Cleave } from "./cleave/cleave";
+import { Codex } from "./codex";
 import { Button } from "@/components/ui/button";
 
 // A calm, weighty ease — slow-out so each section settles rather than snaps.
@@ -154,6 +155,9 @@ export function Halo() {
           </motion.p>
         )}
       </AnimatePresence>
+
+      {/* The codex — a global ⌘+? explainer of the bend/drift mechanism. */}
+      <Codex />
 
       {/* The cleave — a full-screen read-and-flip overlay; nothing generates here. */}
       <AnimatePresence>

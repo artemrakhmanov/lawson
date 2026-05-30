@@ -54,7 +54,7 @@ export function AnnotationCircle({
           strokeLinejoin="round"
           filter={`url(#${filterId})`}
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
+          animate={{ pathLength: 1, opacity: 0.45 }}
           transition={{
             pathLength: { duration, delay, ease: "easeInOut" },
             opacity: { duration: 0.15, delay },
