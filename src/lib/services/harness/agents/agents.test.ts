@@ -12,7 +12,7 @@ const caseState = (): CaseState => ({
   transcript: [],
   matter: { hypothesis: "Criminal — DUI traffic stop", confidence: 0.7 },
   activeSpecialist: "criminal",
-  lawyerMatch: { lawyerId: "stub-criminal", rationale: "police contact + arrest" },
+  lawyerMatch: { lawyerId: "criminal-risk-01", rationale: "police contact + arrest" },
   turnsTaken: 0,
   turnBudget: 3,
 });

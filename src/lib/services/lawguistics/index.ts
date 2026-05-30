@@ -15,7 +15,7 @@ import { convergence as _convergence, lsm } from "./stats.ts";
 import { forStage } from "./drift.ts";
 import { condition as _condition } from "./condition.ts";
 import { judgeFidelity } from "./fidelity.ts";
-import { getLawyer, getSignature, matchTarget, RANGES, ROSTER_MEDIAN } from "./signatures.ts";
+import { getLawyer, getSignature, matchTarget, listLawyers, RANGES, ROSTER_MEDIAN } from "./signatures.ts";
 import type { MetricVector, VoiceSignature, ConditionResult } from "./types.ts";
 
 export const Lawguistics = {
@@ -48,6 +48,8 @@ export const Lawguistics = {
   getSignature,
   getLawyer,
   matchTarget,
+  // the real 6-lawyer roster (corpus stripped) — what Lawson's matching reads (D6)
+  listLawyers,
 };
 
 export type {

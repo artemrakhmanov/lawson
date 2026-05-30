@@ -10,14 +10,16 @@
 import { z } from "zod";
 import { generateObject } from "@/lib/services/ai/client";
 import { config } from "@/lib/services/config";
-import { stubRoster } from "./roster.stub";
+import { Lawguistics } from "@/lib/services/lawguistics";
 import * as prompts from "./prompts";
 import type {
   AgentId, CaseState, PracticeArea, RawSummary, Roster,
 } from "./contracts";
 
-// Swapped for Lawguistics.listLawyers() at D6; Triage code is roster-source-agnostic.
-const roster: Roster = stubRoster;
+// D6: the real 6-lawyer firm roster (firm.json, corpus stripped). Triage code is
+// roster-source-agnostic — matching now discriminates real ids, and emit's
+// matchTarget resolves those same ids to live signatures (they flip together).
+const roster: Roster = Lawguistics.listLawyers();
 
 const AGNOSTIC: AgentId[] = ["claim-quant", "merits-analyst"];
 const SPECIALIST: Record<PracticeArea, AgentId> = {

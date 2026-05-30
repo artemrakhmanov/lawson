@@ -84,12 +84,17 @@ function assembleSummary(sessionId: string, turnId: string, out: Record<string, 
   };
 }
 
-// R5 — per-turn reveal stats. At stage-0 the target is the neutral stub and
-// measure/convergence/lsm aren't real yet, so there is nothing to measure and
-// we persist no stats (panels are identical by design). Phase D (D6) wires the
-// real computation here, still DURING intake — never at cleave time.
-function computeStatsIfReal(_target: VoiceSignature, _out: Record<string, string>): StoredTurn["stats"] {
-  return undefined;
+// R5/D6 — per-turn reveal stats, computed DURING intake (never at cleave time).
+// One {convergence, lsm} per turn: measure the turn's combined conditioned text
+// against the matched lawyer's metric vector. Aggregating the fields yields a
+// stable, low-noise per-turn number — the reveal bar shrinks turn-over-turn.
+function computeStats(target: VoiceSignature, out: Record<string, string>): StoredTurn["stats"] {
+  const text = Object.values(out).join("\n");
+  const v = Lawguistics.measure(text);
+  return {
+    convergence: Lawguistics.convergence(v, target.metrics),
+    lsm: Lawguistics.lsm(v, target.metrics),
+  };
 }
 
 export async function emit(
@@ -120,7 +125,7 @@ export async function emit(
     turnId,
     stage: raw.stage,
     fields: stored,
-    stats: computeStatsIfReal(target, out),
+    stats: computeStats(target, out),
   });
 
   return "agentId" in raw ? assembleTurn(raw, sessionId, turnId, out) : assembleSummary(sessionId, turnId, out);

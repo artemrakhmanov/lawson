@@ -12,7 +12,7 @@ const baseState = (over: Partial<CaseState> = {}): CaseState => ({
   transcript: [],
   matter: { hypothesis: "Criminal — traffic stop", confidence: 0.6 },
   activeSpecialist: "criminal",
-  lawyerMatch: { lawyerId: "stub-criminal", rationale: "police contact" },
+  lawyerMatch: { lawyerId: "criminal-risk-01", rationale: "police contact" },
   turnsTaken: 0,
   turnBudget: 3,
   ...over,
@@ -20,13 +20,13 @@ const baseState = (over: Partial<CaseState> = {}): CaseState => ({
 
 describe("Triage — routing (offline, pure)", () => {
   it("hands the final turn to the matched specialist with no model call", async () => {
-    const s = baseState({ lawyerMatch: { lawyerId: "stub-realestate", rationale: "" }, turnsTaken: 2 });
+    const s = baseState({ lawyerMatch: { lawyerId: "realestate-01", rationale: "" }, turnsTaken: 2 });
     await expect(Triage.selectAgent(s, 1)).resolves.toBe("real-estate");
   });
 
   it("maps each matched practice area to its specialist on the final turn", async () => {
-    await expect(Triage.selectAgent(baseState({ lawyerMatch: { lawyerId: "stub-criminal", rationale: "" } }), 1)).resolves.toBe("criminal");
-    await expect(Triage.selectAgent(baseState({ lawyerMatch: { lawyerId: "stub-commercial", rationale: "" } }), 1)).resolves.toBe("commercial");
+    await expect(Triage.selectAgent(baseState({ lawyerMatch: { lawyerId: "criminal-risk-01", rationale: "" } }), 1)).resolves.toBe("criminal");
+    await expect(Triage.selectAgent(baseState({ lawyerMatch: { lawyerId: "commercial-01", rationale: "" } }), 1)).resolves.toBe("commercial");
   });
 });
 
@@ -42,9 +42,10 @@ describe("Triage — matching (live)", () => {
     expect(dui.matter.confidence).toBeLessThanOrEqual(1);
     expect(dui.turnBudget).toBe(3);
 
-    // matching genuinely discriminates (not constant)
-    expect(dui.lawyerMatch.lawyerId).toBe("stub-criminal");
-    expect(deal.lawyerMatch.lawyerId).toBe("stub-commercial");
+    // matching genuinely discriminates (not constant) — real roster has two
+    // lawyers per area, so assert the matched AREA, not a specific id.
+    expect(dui.lawyerMatch.lawyerId).toMatch(/^criminal/);
+    expect(deal.lawyerMatch.lawyerId).toMatch(/^commercial/);
     expect(dui.lawyerMatch.lawyerId).not.toBe(deal.lawyerMatch.lawyerId);
   }, 30_000);
 
@@ -54,8 +55,8 @@ describe("Triage — matching (live)", () => {
       start,
       "Honestly this isn't criminal at all — it's about my landlord refusing to return my security deposit on the apartment lease.",
     );
-    expect(next.lawyerMatch.lawyerId).not.toBe("stub-criminal");
-    expect(next.lawyerMatch.lawyerId).toBe("stub-realestate");
+    expect(next.lawyerMatch.lawyerId).not.toMatch(/^criminal/);
+    expect(next.lawyerMatch.lawyerId).toMatch(/^realestate/);
     expect(next.matter.hypothesis).not.toBe(start.matter.hypothesis);
     expect(next.activeSpecialist).toBe("real-estate");
   }, 30_000);

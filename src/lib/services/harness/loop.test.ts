@@ -16,7 +16,25 @@ describe("fillSlots (offline)", () => {
   });
 });
 
-describe("Lawson — end-to-end intake (live, stage-0 identity)", () => {
+describe("Lawson — end-to-end intake (live, real voice)", () => {
+  // Focused, budget-friendly D6 check: one opening turn proves real roster
+  // matching + real per-turn stats persisted during intake.
+  live("start: matches the real roster and persists real per-turn stats", async () => {
+    const first = await Lawson.start("I got arrested for a DUI last night and I'm scared.");
+    if (first.kind !== "turn") throw new Error("expected turn");
+    const rec = store.get(first.sessionId)!;
+    expect(rec.caseState.lawyerMatch.lawyerId).toMatch(/^(criminal|realestate|commercial)/);
+    const turn = rec.turns.at(-1)!;
+    expect(turn.stats).toBeDefined();
+    expect(Number.isFinite(turn.stats!.convergence)).toBe(true);
+    expect(turn.stats!.lsm).toBeGreaterThanOrEqual(0);
+    expect(turn.stats!.lsm).toBeLessThanOrEqual(1);
+    for (const f of Object.values(turn.fields)) {
+      expect(f.conditioned.length).toBeGreaterThan(0);
+      expect(f.baseline.length).toBeGreaterThan(0);
+    }
+  }, 90_000);
+
   live("start → answer × N → summary: conditioned-only, both registers stored, done flips", async () => {
     const first = await Lawson.start("I got pulled over and arrested for DUI last night, I'm scared.");
     expect(first.kind).toBe("turn");
@@ -56,17 +74,23 @@ describe("Lawson — end-to-end intake (live, stage-0 identity)", () => {
     expect(summary!.kind).toBe("summary");
     expect(summary!.matterType.length).toBeGreaterThan(0);
 
-    // the store holds BOTH registers for every emitted unit; identical at stage-0
+    // the store holds BOTH registers for every emitted unit; with real voice the
+    // registers diverge and per-turn stats are persisted (R5/D6).
     const rec = store.get(sessionId)!;
     expect(rec.turns.length).toBeGreaterThanOrEqual(3); // opening + question(s) + summary
     for (const turn of rec.turns) {
       for (const f of Object.values(turn.fields)) {
-        expect(f.conditioned).toBe(f.baseline); // baseline == conditioned, and that is correct
+        expect(typeof f.conditioned).toBe("string");
+        expect(f.conditioned.length).toBeGreaterThan(0);
+        expect(typeof f.baseline).toBe("string");
+        expect(f.baseline.length).toBeGreaterThan(0);
       }
-      expect(turn.stats).toBeUndefined(); // no stats until Phase D
+      expect(turn.stats).toBeDefined(); // real stats now, computed during intake
+      expect(typeof turn.stats!.convergence).toBe("number");
+      expect(typeof turn.stats!.lsm).toBe("number");
     }
     expect(rec.turns.at(-1)!.stage).toBe("summary");
-  }, 90_000);
+  }, 300_000); // full intake = many sequential per-field condition calls; on-demand
 
   live("a re-routing answer moves lawyerMatch mid-loop", async () => {
     const first = await Lawson.start("Someone is suing me and I need help, I'm not sure what to do.");
@@ -79,7 +103,7 @@ describe("Lawson — end-to-end intake (live, stage-0 identity)", () => {
     });
 
     const matched = store.get(sessionId)!.caseState.lawyerMatch.lawyerId;
-    expect(matched).toBe("stub-realestate");
+    expect(matched).toMatch(/^realestate/);
   }, 60_000);
 
   live("refreshSummary regenerates the one-pager with fills folded in", async () => {
