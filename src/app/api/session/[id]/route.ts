@@ -16,8 +16,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   }
 
   // The matched lawyer's frozen brief (names the voice the right panel bent
-  // toward). Tolerate a missing/neutral match — the cleave degrades gracefully.
+  // toward) + the lawyer's identity. Tolerate a missing/neutral match — the
+  // cleave degrades gracefully.
   let signature = null;
+  let lawyer = null;
   const lawyerId = rec.caseState.lawyerMatch?.lawyerId;
   if (lawyerId) {
     try {
@@ -25,7 +27,13 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     } catch {
       signature = null;
     }
+    try {
+      const l = Lawguistics.getLawyer(lawyerId);
+      lawyer = { name: l.meta.name, title: l.meta.title, practiceArea: l.practiceArea };
+    } catch {
+      lawyer = null;
+    }
   }
 
-  return Response.json({ turns: rec.turns, signature });
+  return Response.json({ turns: rec.turns, signature, lawyer });
 }

@@ -161,6 +161,7 @@ export function Halo() {
           <Cleave
             turns={cleaved.turns}
             signature={cleaved.signature}
+            lawyer={cleaved.lawyer}
             focusTurnId={cleaved.focusTurnId}
             onClose={uncleave}
           />

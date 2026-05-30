@@ -32,9 +32,12 @@ interface Nav {
 
 // The cleave's read-and-flip payload: both registers per turn + per-turn stats
 // + the matched lawyer's brief. Read from the store, never generated.
+export type CleaveLawyer = { name: string; title: string; practiceArea: string };
+
 export interface CleaveData {
   turns: StoredTurn[];
   signature: VoiceBrief | null;
+  lawyer: CleaveLawyer | null;
   focusTurnId: string;
 }
 
@@ -226,10 +229,17 @@ export function useHaloInteractor() {
   const cleave = useCallback(async () => {
     if (!current) return;
     try {
-      const data = await getJSON<{ turns: StoredTurn[]; signature: VoiceBrief | null }>(
-        `/api/session/${current.sessionId}`,
-      );
-      setCleaved({ turns: data.turns, signature: data.signature, focusTurnId: current.turnId });
+      const data = await getJSON<{
+        turns: StoredTurn[];
+        signature: VoiceBrief | null;
+        lawyer: CleaveLawyer | null;
+      }>(`/api/session/${current.sessionId}`);
+      setCleaved({
+        turns: data.turns,
+        signature: data.signature,
+        lawyer: data.lawyer,
+        focusTurnId: current.turnId,
+      });
     } catch (e) {
       setError((e as Error).message);
     }

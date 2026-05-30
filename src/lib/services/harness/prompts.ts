@@ -102,6 +102,12 @@ export function composeSummary(input: { caseState: CaseState }): PromptTemplate 
       `- parties: who is involved, in the client's first person ("I'm the tenant; ` +
       `my landlord…").\n` +
       `- theAsk: what the client wants, in their own first-person words ("I want to…").\n\n` +
+      `Example of the required first-person voice (a DIFFERENT matter — copy the voice, not the facts):\n` +
+      `  matterType: "Commercial deposit dispute"\n` +
+      `  keyFacts: "I paid a £2,000 deposit on 5 Jan 2023 when I leased the shop unit. ` +
+      `When I left, my landlord kept it claiming repairs, but never gave me receipts."\n` +
+      `  parties: "I'm the former commercial tenant; my landlord owns the unit."\n` +
+      `  theAsk: "I want my full deposit back, minus only repairs they can actually prove."\n\n` +
       `Hard rules:\n` +
       `- Be concise: one to three short sentences per field. No padding, no hedging, ` +
       `no reassurance, no throat-clearing.\n` +

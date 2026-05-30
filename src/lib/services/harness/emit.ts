@@ -36,13 +36,17 @@ function reconcile(input: string, conditioned: string, baseline: string): Stored
 }
 
 // ── field walkers — known fields only, handled explicitly ────────────────────
+// An optional surface field counts only if it carries non-whitespace text — the
+// model sometimes returns an empty preamble/framing rather than omitting it.
+const hasText = (s: string | undefined): s is string => typeof s === "string" && s.trim() !== "";
+
 function turnFields(t: RawTurn): [string, string][] {
   const f: [string, string][] = [];
-  if (t.preamble !== undefined) f.push(["preamble", t.preamble]);
+  if (hasText(t.preamble)) f.push(["preamble", t.preamble]);
   f.push(["question", t.question]);
-  if (t.framing !== undefined) f.push(["framing", t.framing]);
+  if (hasText(t.framing)) f.push(["framing", t.framing]);
   t.scaffolds.forEach((s, i) => f.push([`scaffold.${i}`, s]));
-  if (t.reassurance !== undefined) f.push(["reassurance", t.reassurance]);
+  if (hasText(t.reassurance)) f.push(["reassurance", t.reassurance]);
   f.push(["freeform.placeholder", t.freeform.placeholder]);
   return f;
 }
@@ -63,11 +67,11 @@ function assembleTurn(t: RawTurn, sessionId: string, turnId: string, out: Record
     turnId,
     agentId: t.agentId,
     stage: t.stage,
-    ...(t.preamble !== undefined ? { preamble: out.preamble } : {}),
+    ...(out.preamble !== undefined ? { preamble: out.preamble } : {}),
     question: out.question,
-    ...(t.framing !== undefined ? { framing: out.framing } : {}),
+    ...(out.framing !== undefined ? { framing: out.framing } : {}),
     scaffolds: t.scaffolds.map((_, i) => out[`scaffold.${i}`]),
-    ...(t.reassurance !== undefined ? { reassurance: out.reassurance } : {}),
+    ...(out.reassurance !== undefined ? { reassurance: out.reassurance } : {}),
     freeform: { placeholder: out["freeform.placeholder"] },
   };
 }

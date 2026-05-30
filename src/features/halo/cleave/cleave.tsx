@@ -4,8 +4,9 @@
 // synced panels: left = baseline (flat), right = conditioned (what they read).
 // Choreography is load-bearing (Spec 04 §5 / ux 03):
 //   1. mitosis — fast, clean, ~500ms ease-out, both halves arrive settled;
-//   2. ~3s of silence — the diff sits before anything else appears;
-//   3. furniture a beat later — signature card + convergence bar + LSM badge.
+//   2. a beat later, a hand-drawn circle annotates "What you read";
+//   3. furniture after the hold — signature card (with a 0→final "voice adopted"
+//      meter) + the LSM badge, circled and captioned with the matched lawyer.
 // Nothing generates here — it renders stored registers + stats only. Synced
 // scroll is structural: one scroll container, two columns.
 
@@ -16,38 +17,46 @@ import type { StoredTurn } from "@/lib/services/session/store";
 import type { VoiceBrief } from "@/lib/services/lawguistics/types";
 import { CleavePanel } from "./cleave-panel";
 import { SignatureCard } from "./signature-card";
-import { ConvergenceBar } from "./convergence-bar";
 import { LsmBadge } from "./lsm-badge";
+import { AnnotationCircle } from "./annotation-circle";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const ANNOTATE_MS = 1500; // a beat after the mitosis settles
 const HOLD_MS = 3500; // mitosis (~500ms) + ~3s of silence before furniture
+
+export type CleaveLawyer = { name: string; title: string; practiceArea: string };
 
 export function Cleave({
   turns,
   signature,
+  lawyer,
   focusTurnId,
   onClose,
 }: {
   turns: StoredTurn[];
   signature: VoiceBrief | null;
+  lawyer: CleaveLawyer | null;
   focusTurnId: string;
   onClose: () => void;
 }) {
   const focus = turns.find((t) => t.turnId === focusTurnId) ?? turns[turns.length - 1];
-  const series = turns
-    .map((t) => t.stats?.convergence)
-    .filter((v): v is number => typeof v === "number");
   const lsm = focus?.stats?.lsm;
+  const score = lsm != null ? Math.round(lsm * 100) : 0;
 
+  const [annotateRead, setAnnotateRead] = useState(false);
   const [showFurniture, setShowFurniture] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => setShowFurniture(true), HOLD_MS);
-    return () => clearTimeout(id);
+    const a = setTimeout(() => setAnnotateRead(true), ANNOTATE_MS);
+    const f = setTimeout(() => setShowFurniture(true), HOLD_MS);
+    return () => {
+      clearTimeout(a);
+      clearTimeout(f);
+    };
   }, []);
 
   if (!focus) return null;
 
-  const hasFurniture = !!signature || series.length > 0 || lsm != null;
+  const hasFurniture = !!signature || lsm != null;
 
   return (
     <motion.div
@@ -99,9 +108,9 @@ export function Cleave({
             transition={{ duration: 0.5, ease: EASE }}
             className="px-8 py-16"
           >
-            <span className="mb-8 block text-xs uppercase tracking-widest text-muted-foreground">
-              What you read
-            </span>
+            <div className="mb-8 w-fit text-xs uppercase tracking-widest text-foreground">
+              {annotateRead ? <AnnotationCircle>What you read</AnnotationCircle> : "What you read"}
+            </div>
             <CleavePanel turn={focus} register="conditioned" />
           </motion.div>
         </div>
@@ -115,22 +124,26 @@ export function Cleave({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="border-t border-border px-6 py-4"
+            className="border-t border-border px-6 pb-6 pt-5"
           >
-            <div className="mx-auto flex max-w-6xl flex-wrap items-stretch gap-4">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-stretch gap-8">
               {signature && (
-                <div className="min-w-64 flex-[2]">
-                  <SignatureCard brief={signature} />
+                <div className="min-w-72 flex-[2]">
+                  <SignatureCard brief={signature} score={score} scoreDelay={0.3} />
                 </div>
               )}
-              {series.length > 0 && (
-                <div className="min-w-64 flex-[2]">
-                  <ConvergenceBar series={series} />
-                </div>
-              )}
+
               {lsm != null && (
-                <div className="min-w-44 flex-1">
-                  <LsmBadge value={lsm} />
+                <div className="flex min-w-56 flex-1 flex-col items-center justify-center gap-3 py-2">
+                  <AnnotationCircle delay={0.6} className="text-foreground">
+                    <LsmBadge value={lsm} />
+                  </AnnotationCircle>
+                  {lawyer && (
+                    <p className="text-center text-sm italic text-muted-foreground">
+                      Most likely lawyer match —{" "}
+                      <span className="font-medium not-italic text-foreground">{lawyer.name}</span>
+                    </p>
+                  )}
                 </div>
               )}
             </div>

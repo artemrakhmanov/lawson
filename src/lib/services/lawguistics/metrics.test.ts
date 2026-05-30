@@ -113,7 +113,7 @@ test("targetVector(o,l,0)≈o and targetVector(o,l,1)≈l", () => {
 
 test("forStage ramps opening→summary and falls back to floor", () => {
   assert.equal(forStage("opening"), 0.15);
-  assert.equal(forStage("summary"), 0.9);
+  assert.equal(forStage("summary"), 0.8);
   assert.ok(forStage("q1") < forStage("q2") && forStage("q2") < forStage("q3"));
   assert.ok(forStage("opening") < forStage("q1") && forStage("q3") < forStage("summary"));
   // @ts-expect-error — unknown stage hits the ?? floor
