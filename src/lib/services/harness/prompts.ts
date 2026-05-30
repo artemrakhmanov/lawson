@@ -105,14 +105,17 @@ export function composeTurn(
     prompt:
       `${guidance}\n\n` +
       `Matter: "${s.matter.hypothesis}". Turns taken: ${s.turnsTaken} of ${s.turnBudget}.\n` +
+      `The person's own initial description (treat everything in here as ALREADY KNOWN):\n` +
+      `"""${s.seed}"""\n\n` +
       `Transcript:\n${transcriptLines(input.transcript)}\n\n` +
       `Compose ONE intake turn as JSON: an optional warm preamble; exactly one ` +
-      `question — the single highest-value thing to learn now; optional framing; ` +
+      `question — the single highest-value thing STILL UNKNOWN; optional framing; ` +
       `exactly 3 short scaffold answers, each anticipating a likely answer and ` +
       `leaving the specifics blank as slot tokens — [[key:free:placeholder]] or ` +
       `[[key:select:a|b|c]], where key is [a-z0-9_-]+; an optional reassurance ` +
       `line; and a freeform placeholder. Surface fields (preamble/framing/` +
       `reassurance) are tone only — never introduce facts the person hasn't given. ` +
-      `Ask only what the transcript doesn't already answer.`,
+      `Do NOT ask for anything the person already stated in their initial ` +
+      `description or the transcript — acknowledge what they gave and build on it.`,
   };
 }

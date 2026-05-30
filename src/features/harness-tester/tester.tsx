@@ -128,7 +128,7 @@ export function Tester() {
             {(["keyFacts", "parties", "theAsk"] as const).map((field) => (
               <div key={field} className="flex flex-col gap-1">
                 <span className="text-xs uppercase tracking-wide text-muted-foreground">{field}</span>
-                <SlotFill text={current[field]} values={fills} onChange={actions.fillSlot} />
+                <SlotFill text={current[field]} values={fills} onChange={actions.fillSlot} namespace={field} />
               </div>
             ))}
             <div className="border-t border-border pt-3">
