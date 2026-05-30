@@ -37,7 +37,7 @@ export function AnnotationCircle({
         aria-hidden
         viewBox="0 0 200 60"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute -left-5 -top-2.5 h-[calc(100%+1.25rem)] w-[calc(100%+2.5rem)] overflow-visible text-foreground"
+        className="pointer-events-none absolute -left-10 -top-6 h-[calc(100%+3rem)] w-[calc(100%+5rem)] overflow-visible text-foreground"
       >
         <defs>
           <filter id={filterId}>

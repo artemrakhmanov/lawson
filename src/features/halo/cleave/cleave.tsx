@@ -135,9 +135,9 @@ export function Cleave({
 
               {lsm != null && (
                 <div className="flex min-w-56 flex-1 flex-col items-center justify-center gap-3 py-2">
-                  <AnnotationCircle delay={0.6} className="text-foreground">
+                  <div className="rounded-lg border border-border">
                     <LsmBadge value={lsm} />
-                  </AnnotationCircle>
+                  </div>
                   {lawyer && (
                     <p className="text-center text-sm italic text-muted-foreground">
                       Most likely lawyer match —{" "}
