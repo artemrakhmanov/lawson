@@ -44,6 +44,7 @@ export function StepBridge({
         >
           {preamble && (
             <TextGenerateEffect
+              key={preamble}
               words={preamble}
               textClassName="text-xl font-normal leading-relaxed tracking-tight text-foreground md:text-2xl"
             />

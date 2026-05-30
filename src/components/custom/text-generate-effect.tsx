@@ -19,7 +19,10 @@ export const TextGenerateEffect = ({
   staggerOverride?: number;
 }) => {
   const [scope, animate] = useAnimate();
-  let wordsArray = words.split(" ");
+  const wordsArray = words.split(" ");
+  // Re-run the reveal whenever the text changes — keying on `scope.current`
+  // alone never re-fires (the ref node is stable), so a reused instance with a
+  // new `words` prop would render its spans stuck at opacity-0.
   useEffect(() => {
     animate(
       "span",
@@ -32,7 +35,7 @@ export const TextGenerateEffect = ({
         delay: stagger(staggerOverride ? staggerOverride : 0.01),
       }
     );
-  }, [scope.current]);
+  }, [words, animate, filter, duration, staggerOverride]);
 
   const renderWords = () => {
     return (
