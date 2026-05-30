@@ -59,17 +59,19 @@ export function selectAgent(input: { caseState: CaseState; turnsRemaining: numbe
 }
 
 /** recalibrate(s, answer) → CaseState: fold the new answer in; matter/lawyerMatch may move. */
-export function recalibrate(input: { caseState: CaseState; answer: string }): PromptTemplate {
+export function recalibrate(input: { caseState: CaseState; answer: string; roster: Roster }): PromptTemplate {
   const s = input.caseState;
   return {
     system: HALO_SYSTEM,
     prompt:
       `Matter so far: "${s.matter.hypothesis}" (confidence ${s.matter.confidence}). ` +
       `Matched lawyer: ${s.lawyerMatch.lawyerId}.\n\n` +
+      `The firm roster:\n${rosterLines(input.roster)}\n\n` +
       `Transcript:\n${transcriptLines(s.transcript)}\n\n` +
       `The person just answered:\n"""${input.answer}"""\n\n` +
       `Update the matter hypothesis and confidence. If the evidence now points to a ` +
-      `different lawyer, move the match and explain why; otherwise keep it.`,
+      `different lawyer id in the roster, move the match and explain why; otherwise keep it. ` +
+      `Always return a lawyerId that exists in the roster above.`,
   };
 }
 
