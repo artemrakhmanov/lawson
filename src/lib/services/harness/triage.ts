@@ -54,10 +54,10 @@ const matchShape = {
 const BootstrapSchema = z.object(matchShape);
 const RecalibrateSchema = z.object(matchShape);
 const SummarySchema = z.object({
-  matterType: z.string().describe("short plain label for the kind of matter — no merits or verdict"),
-  keyFacts: z.string().describe("plain prose of what happened, from the person's own account; a slot only where a detail is genuinely missing"),
-  parties: z.string().describe("who is involved"),
-  theAsk: z.string().describe("what the person is seeking, stated as their position — not advice, merits, or next steps"),
+  matterType: z.string().describe("short noun-phrase label for the kind of matter (3–6 words) — no merits, verdict, sentences, or slots"),
+  keyFacts: z.string().describe("what happened, in the CLIENT's own first person ('I paid…', 'my landlord…'); a slot only where a detail is genuinely missing"),
+  parties: z.string().describe("who is involved, in the client's first person ('I'm the tenant; my landlord is…')"),
+  theAsk: z.string().describe("what the client wants, in their first person ('I want…') — not advice, merits, or next steps"),
 });
 
 export const Triage = {

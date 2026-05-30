@@ -9,6 +9,7 @@
 // A sticky 3-dot progress capsule rides the top through the question ladder. Past
 // steps are revisited read-only (interactive only at the tip).
 
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
 import { config } from "@/lib/services/config";
@@ -19,6 +20,7 @@ import { TurnView } from "./turn-view";
 import { OnePager } from "./one-pager";
 import { ProgressCapsule } from "./progress-capsule";
 import { StepBridge } from "./step-bridge";
+import { Cleave } from "./cleave/cleave";
 import { Button } from "@/components/ui/button";
 
 // A calm, weighty ease — slow-out so each section settles rather than snaps.
@@ -37,11 +39,29 @@ const STAGE_STEP: Record<Stage, number> = { opening: 0, q1: 1, q2: 2, q3: 3, sum
 
 export function Halo() {
   const { state, actions } = useHaloInteractor();
-  const { current, fills, error, staged, advancing, busy, atTip, canBack, canForward, direction } = state;
+  const { current, fills, error, cleaved, staged, advancing, busy, atTip, canBack, canForward, direction } =
+    state;
 
   // Key the slide by screen identity so each new turn animates in.
   const screenKey = current ? `${current.kind}:${current.turnId}` : "opening";
   const hasSession = current !== null;
+
+  // ⌘/Ctrl + . cleaves the reading panel; Escape (or the same chord) reverses.
+  const { cleave, uncleave } = actions;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === ".") {
+        e.preventDefault();
+        if (!hasSession || busy) return;
+        if (cleaved) uncleave();
+        else cleave();
+      } else if (e.key === "Escape" && cleaved) {
+        uncleave();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasSession, busy, cleaved, cleave, uncleave]);
 
   const isSummary = current?.kind === "summary";
   const activeStep = current?.kind === "turn" ? STAGE_STEP[current.stage] : 0;
@@ -118,6 +138,33 @@ export function Halo() {
             </div>
           )}
         </motion.section>
+      </AnimatePresence>
+
+      {/* Cleave hint — only on the summary, only before the reveal. */}
+      <AnimatePresence>
+        {isSummary && !cleaved && !busy && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 0.6 }}
+            className="pointer-events-none absolute inset-x-0 bottom-6 z-30 text-center text-xs text-muted-foreground"
+          >
+            Press ⌘ + . to compare voices
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      {/* The cleave — a full-screen read-and-flip overlay; nothing generates here. */}
+      <AnimatePresence>
+        {cleaved && (
+          <Cleave
+            turns={cleaved.turns}
+            signature={cleaved.signature}
+            focusTurnId={cleaved.focusTurnId}
+            onClose={uncleave}
+          />
+        )}
       </AnimatePresence>
 
       {/* Error affordance, overlaid so it doesn't shift the sliding sections. */}

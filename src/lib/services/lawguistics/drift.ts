@@ -16,8 +16,8 @@ const DRIFT_BY_STAGE: Record<Stage, number> = {
   opening: 0.15,
   q1: 0.4,
   q2: 0.65,
-  q3: 0.85,
-  summary: 0.9,
+  q3: 0.8,
+  summary: 0.8,
 };
 
 export function forStage(stage: Stage): number {

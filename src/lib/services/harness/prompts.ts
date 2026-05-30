@@ -16,10 +16,9 @@ const HALO_SYSTEM =
   "You are the reasoning core of Halo, a terse legal-intake assistant. You produce " +
   "the substance of a single intake step as strict JSON matching the requested schema. " +
   "Be concise, concrete, and plain-spoken — short sentences, no filler, no reassurance, " +
-  "no throat-clearing. The assistant/firm voice is impersonal or 'we' — NEVER the " +
-  "first-person 'I' and never a named lawyer; only the CLIENT's own words (scaffold " +
-  "answers and the client summary) speak in the first person ('I'/'my'). Never invent " +
-  "facts the user did not give; ask, don't assume. Output substance only — tone is applied downstream.";
+  "no throat-clearing. Each step tells you who is speaking and in which grammatical " +
+  "person — follow it exactly. Never invent facts the user did not give; ask, don't " +
+  "assume. Output substance only — tone is applied downstream.";
 
 const rosterLines = (roster: Roster): string =>
   roster
@@ -86,9 +85,11 @@ export function composeSummary(input: { caseState: CaseState }): PromptTemplate 
   return {
     system: HALO_SYSTEM,
     prompt:
-      `Write the client's intake one-pager — a concise account of THEIR situation ` +
-      `and what they're seeking, in the CLIENT's OWN first-person voice ("I", "my", ` +
-      `"we" as the client). It states their position; it is NOT legal analysis or an answer.\n\n` +
+      `Write the client's OWN STATEMENT of their matter — as if THEY are telling it, ` +
+      `in the first person ("I", "my", "we" as the client). It is their plain account ` +
+      `of what happened and what they want; it is NOT a third-person case note, NOT ` +
+      `legal analysis, and NOT an answer. Every sentence in keyFacts/parties/theAsk ` +
+      `should sound like the client speaking ("I paid…", "My landlord…", "I want…").\n\n` +
       `Matter type (working hypothesis): "${s.matter.hypothesis}".\n` +
       `The person's initial description:\n"""${s.seed}"""\n` +
       `Transcript:\n${transcriptLines(s.transcript)}\n\n` +

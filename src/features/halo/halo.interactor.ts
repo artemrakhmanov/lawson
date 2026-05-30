@@ -21,11 +21,21 @@ import type {
   ConditionedSummary,
   ConditionedView,
 } from "@/lib/services/harness/contracts";
+import type { StoredTurn } from "@/lib/services/session/store";
+import type { VoiceBrief } from "@/lib/services/lawguistics/types";
 
 type View = ConditionedView | ConditionedSummary;
 interface Nav {
   stack: View[];
   cursor: number; // -1 = opening prompt (no view yet)
+}
+
+// The cleave's read-and-flip payload: both registers per turn + per-turn stats
+// + the matched lawyer's brief. Read from the store, never generated.
+export interface CleaveData {
+  turns: StoredTurn[];
+  signature: VoiceBrief | null;
+  focusTurnId: string;
 }
 
 const MIRROR_KEY = "lawson.halo.v1";
@@ -42,12 +52,21 @@ async function post<T>(url: string, body: unknown): Promise<T> {
   return json as T;
 }
 
+async function getJSON<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error ?? res.statusText);
+  return json as T;
+}
+
 export interface HaloState {
   current: View | null;
   fills: Record<string, string>;
   /** A request is in flight (the preamble is still shimmering / summary refreshing). */
   pending: boolean;
   error: string | null;
+  /** When set, the cleave is open (read-and-flip payload from the store). */
+  cleaved: CleaveData | null;
   /** The next view, fetched but not yet committed — its preamble bridges below. */
   staged: View | null;
   /** True from the moment an advance begins until the user proceeds (drives the bridge). */
@@ -69,6 +88,7 @@ export function useHaloInteractor() {
   const [error, setError] = useState<string | null>(null);
   const [staged, setStaged] = useState<View | null>(null);
   const [advancing, setAdvancing] = useState(false);
+  const [cleaved, setCleaved] = useState<CleaveData | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const hydrated = useRef(false);
 
@@ -197,9 +217,25 @@ export function useHaloInteractor() {
     setNav(EMPTY);
     setStaged(null);
     setAdvancing(false);
+    setCleaved(null);
     setFills({});
     setError(null);
   }, []);
+
+  // ── the cleave: read-and-flip, no generation (Spec 04 §5.1) ───────────────
+  const cleave = useCallback(async () => {
+    if (!current) return;
+    try {
+      const data = await getJSON<{ turns: StoredTurn[]; signature: VoiceBrief | null }>(
+        `/api/session/${current.sessionId}`,
+      );
+      setCleaved({ turns: data.turns, signature: data.signature, focusTurnId: current.turnId });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, [current]);
+
+  const uncleave = useCallback(() => setCleaved(null), []);
 
   const state: HaloState = useMemo(
     () => ({
@@ -207,6 +243,7 @@ export function useHaloInteractor() {
       fills,
       pending,
       error,
+      cleaved,
       staged,
       advancing,
       busy: advancing || pending,
@@ -215,8 +252,11 @@ export function useHaloInteractor() {
       canForward: nav.cursor >= 0 && nav.cursor < nav.stack.length - 1,
       direction,
     }),
-    [current, fills, pending, error, staged, advancing, atTip, nav.cursor, nav.stack.length, direction],
+    [current, fills, pending, error, cleaved, staged, advancing, atTip, nav.cursor, nav.stack.length, direction],
   );
 
-  return { state, actions: { start, answer, fillSlot, refreshSummary, proceed, back, forward, reset } };
+  return {
+    state,
+    actions: { start, answer, fillSlot, refreshSummary, proceed, back, forward, reset, cleave, uncleave },
+  };
 }
