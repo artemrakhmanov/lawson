@@ -4,6 +4,11 @@
 
 > **Lawguistics here is a mock.** The real conditioning tool isn't built yet. This spec defines the *seam, the contract, and the invariant* so the real tool drops in later without touching the harness. The mock is a deliberate, swappable implementation behind a fixed interface.
 
+> **⚠️ Superseded specifics — see [`00-master-order.md`](00-master-order.md) (R1–R7), authoritative.** The *concepts* below (single `emit` gateway, stage 0→1→real progression, "pipes before water," supporting text as the diffable surface) all stand. Three **physical** details were resolved later and override this doc where they differ:
+> - **No separate `mock.ts` (R2).** The conditioning lives in `lawguistics/index.ts.condition`; the voice lane owns **all** of `lawguistics/**` and ships it as build row A2. The harness only imports `{ Lawguistics }`. Read "promote `mock.ts` to stage 1" below as "the voice lane replaces the stage-0 identity inside `lawguistics/` (Phase D)."
+> - **Paths are `src/lib/services/…`** (not bare `services/…`), and signatures are **consolidated under `lawguistics/`** (no separate `signatures/` dir).
+> - **`condition(text, target: VoiceSignature, drift, origin?)` (R1).** `target` is the resolved `VoiceSignature`, not a loose descriptor; `emit` resolves it via `Lawguistics.matchTarget(lawyerId)`.
+
 ---
 
 ## 1. Three architectural commitments (the spine of this spec)
@@ -56,11 +61,11 @@ services/
       commercial.ts    # specialist
     slots/
       encode.ts        # typed slot syntax + parse/serialize (shared w/ summary & UI)
-  lawguistics/
-    index.ts           # the conditioning interface (real tool plugs in here)
-    mock.ts            # the swappable mock implementation (this spec)
+  lawguistics/         # VOICE-LANE OWNED (R2); harness only imports { Lawguistics }
+    index.ts           # the conditioning interface; stage-0 identity lives HERE (no mock.ts — R2)
     drift.ts           # the drift schedule
-  signatures/          # voice signatures / match target descriptors (provisional)
+    # types.ts, metrics.ts, condition.ts, signatures.ts, data/*.json … all under here (R4)
+  # (no separate signatures/ dir — consolidated under lawguistics/, R4)
   session/
     store.ts           # canonical server-side session state (in-memory Map)
 ```
@@ -139,8 +144,8 @@ The domain language is the API — see §10 on branding. The interface is the `L
 Lawguistics.condition(text, target, drift) -> { conditioned, baseline }
 ```
 - `text`: one register-bearing field (may contain slot tokens).
-- `target`: the matched lawyer's voice descriptor (from `caseState.lawyerMatch`).
-- `drift`: 0 (mirror the user) → 1 (full lawyer voice).
+- `target`: the resolved **`VoiceSignature`** (R1) — `emit` derives it from `caseState.lawyerMatch.lawyerId` via `Lawguistics.matchTarget()`. (This doc's older "voice descriptor" wording is superseded.)
+- `drift`: 0 (mirror the user) → 1 (full lawyer voice). Optional 4th arg `origin?: MetricVector` (R1); omitted → roster-median.
 - Returns both registers of the *same substance*; **must preserve slot tokens**; **must not change facts** (tone only).
 
 ### 5.2 The mock (`mock.ts`) — swappable, built in stages
@@ -191,14 +196,14 @@ Full UX is Spec 03. Here we define **only the seam** the UI consumes, so the har
 ## 8. Build order (a Claude Code session)
 
 1. `services/ai/client.ts` — the single SDK wrapper (`generateObject`/`generateText`, temps, retries).
-2. `lawguistics/index.ts` — the `Lawguistics` interface + **`mock.ts` at stage 0 (identity passthrough: `{conditioned: text, baseline: text}`)** + `drift.ts` (inert at stage 0). Build stage 0 *only* here; voice comes later.
+2. `lawguistics/index.ts` — the `Lawguistics` interface + **stage-0 identity passthrough inside `index.ts.condition` (`{conditioned: text, baseline: text}`)** + `drift.forStage → 0`. **Owned by the voice lane and shipped as master-order row A2, not the harness (R2)** — there is no `mock.ts`. The harness consumes it.
 3. `slots/encode.ts` — typed token syntax + `parse`/`serialize` + the delimiter validator used by the gateway.
 4. `harness/emit.ts` — the gateway: field-walk, call `Lawguistics.condition` per register-bearing field, persist both registers, validate slot preservation, return conditioned view.
 5. `harness/triage.ts` (`Triage`) + `agents/*` — bootstrap/select/recalibrate/composeSummary and the five agents, each (prompt + Zod schema) producing substance incl. the supporting-text fields (§4).
 6. `harness/loop.ts` (`Lawson`) — holds `caseState`, the only `emit` caller; wire the flow (§3.1).
 7. Route handlers (1:1 with `Lawson` methods) + `session/store.ts`.
 8. The **thin MVP UI** (§7) — interactor + dumb component to run the swarm end-to-end with working typed slots and summary refresh. **At this point the pipeline is fully verifiable on the stage-0 identity mock — both panels identical, all plumbing proven.**
-9. **Only now: promote `mock.ts` to stage 1 (model-backed).** Voice appears; tune surface-text prompts (§4) and drift (§5.2) until the contrast pops. Plumbing is already trusted, so any weakness here is isolated to voice.
+9. **Only now: the voice lane replaces the stage-0 identity inside `lawguistics/` with real conditioning (master-order Phase D, R2)** — no `mock.ts`, all internal to `lawguistics/index.ts`/`condition.ts`. Voice appears; tune surface-text prompts (§4) and drift (§5.2) until the contrast pops. Plumbing is already trusted, so any weakness here is isolated to voice.
 
 ---
 
