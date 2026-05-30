@@ -5,7 +5,7 @@
 // lands with the steps that consume these (P4 triage, P5 agents); these are
 // the frozen-shape starter templates.
 
-import type { AgentId, CaseState, Roster, Turn } from "./contracts";
+import type { CaseState, Roster, Turn } from "./contracts";
 
 export type PromptTemplate = { system: string; prompt: string };
 
@@ -92,36 +92,27 @@ export function composeSummary(input: { caseState: CaseState }): PromptTemplate 
 
 // ── Bench agents (moderate temp) ─────────────────────────────────────────────
 
-// Each agent's distinct character. The composeTurn template injects the role so
-// every agent asks in its own register while sharing one frozen prompt shape.
-const AGENT_ROLES: Record<AgentId, string> = {
-  "claim-quant":
-    "the numbers analyst — you quantify: amounts, dates, durations, losses, what a claim is worth.",
-  "merits-analyst":
-    "the merits analyst — you weigh whether a grievance is worth pursuing and where it is strong or weak.",
-  criminal:
-    "the criminal-defense specialist — you move fast on exposure, custody, what was said, and what happens next.",
-  "real-estate":
-    "the real-estate specialist — you pin down the property, the contract, the deadlines, and the parties to it.",
-  commercial:
-    "the commercial specialist — you read the business arrangement, its terms, and the commercial risk first.",
-};
-
-/** composeTurn(agentId, {caseState, transcript}) → RawTurn substance for the next question. */
+/** composeTurn({caseState, transcript}, guidance) → RawTurn substance. The
+ *  area-true persona is injected as `guidance` (owned by each agent file), so
+ *  every agent asks in its own register while sharing one frozen prompt shape. */
 export function composeTurn(
-  agentId: AgentId,
   input: { caseState: CaseState; transcript: Turn[] },
+  guidance: string,
 ): PromptTemplate {
   const s = input.caseState;
   return {
     system: HALO_SYSTEM,
     prompt:
-      `You are ${AGENT_ROLES[agentId]}\n\n` +
-      `Matter: "${s.matter.hypothesis}". Stage budget left: ${s.turnBudget - s.turnsTaken}.\n` +
+      `${guidance}\n\n` +
+      `Matter: "${s.matter.hypothesis}". Turns taken: ${s.turnsTaken} of ${s.turnBudget}.\n` +
       `Transcript:\n${transcriptLines(input.transcript)}\n\n` +
-      `Compose ONE intake turn: an optional warm preamble, exactly one question, ` +
-      `optional framing, exactly 3 short scaffold answers (each may carry ` +
-      `[[key:free:placeholder]] or [[key:select:a|b|c]] slot tokens), an optional ` +
-      `reassurance line, and a freeform placeholder. Ask only what you don't yet know.`,
+      `Compose ONE intake turn as JSON: an optional warm preamble; exactly one ` +
+      `question — the single highest-value thing to learn now; optional framing; ` +
+      `exactly 3 short scaffold answers, each anticipating a likely answer and ` +
+      `leaving the specifics blank as slot tokens — [[key:free:placeholder]] or ` +
+      `[[key:select:a|b|c]], where key is [a-z0-9_-]+; an optional reassurance ` +
+      `line; and a freeform placeholder. Surface fields (preamble/framing/` +
+      `reassurance) are tone only — never introduce facts the person hasn't given. ` +
+      `Ask only what the transcript doesn't already answer.`,
   };
 }
